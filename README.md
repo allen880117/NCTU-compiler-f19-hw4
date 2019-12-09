@@ -12,8 +12,17 @@ Your assignment is to perform semantic analyses for a `P` program. In the previo
 	- [Pseudocomments](#pseudocomments)
 	- [Symbol Table](#symbol-table)
 	- [Semantic Definition](#semantic-definition)
+	- [Implementation Hints](#implementation-hints)
+		- [Symbol Table Construction (one-pass)](#symbol-table-construction-one-pass)
+		- [Source Code Listing in Semantic Error](#source-code-listing-in-semantic-error)
+		- [Visiting of FunctionNode](#visiting-of-functionnode)
+		- [Type Information Propagation](#type-information-propagation)
 	- [What Should Your Parser Do?](#what-should-your-parser-do)
 	- [Project Structure](#project-structure)
+	- [Assessment Rubrics (Grading)](#assessment-rubrics-grading)
+	- [Build and Execute](#build-and-execute)
+		- [Build Project](#build-project)
+		- [Test your parser](#test-your-parser)
 	- [Submitting the Assignment](#submitting-the-assignment)
 
 ## Assignment
@@ -276,6 +285,61 @@ There are 7 distinct kinds of statements: compound, simple, conditional, while, 
 
 - The first 32 characters are significant. That is, the additional part of an identifier will be discarded by the parser.
 
+## Implementation Hints
+
+### Symbol Table Construction (one-pass)
+
+Since we need to **push** a symbol table when entering a new scope and **pop** a symbol table when exiting a scope, the property of stack - LIFO is really suitable. As a result, you may have a code snippet like this:
+
+```cpp
+class SymbolEntry {
+private:
+    // Variable names
+    // Kind
+    // Level
+    // ...
+};
+
+class SymbolTable {
+public:
+    void addSymbol(/* attributes needed by a SymbolEntry */);
+    // other methods
+private:
+    std::vector<SymbolEntry> entries;
+};
+
+class SymbolManager {
+public:
+    // Pass-by-value is slow and has unnecessary object construction,
+    // but otherwise the implementation is simpler.
+    // For efficientcy, you may try to learn how to use rvalue reference
+    void pushScope(SymbolTable new_scope);
+    void popScope();
+    // other methods
+private:
+    std::stack <SymbolTable> tables;
+};
+```
+
+### Source Code Listing in Semantic Error
+
+To achieve this function, you need to revise your `scanner.l`.
+
+Here are some possible approaches to implement this function:
+
+1. Use `strdup()` to record each line of source code in an array of pointer to `char`.
+2. Record the file position of head of each line in an array of `long`, then use `fseek()` + `fgets()` to get the source code when needed.
+
+### Visiting of FunctionNode
+
+Since parameters need to be in the same scope as the body (compound statement) of FunctionNode, you may need to skip visiting the body (compound statement node) in FunctionNode and visit the child nodes of that CompoundStatementNode directly.
+
+### Type Information Propagation
+
+Some semantic checks are related to type incompatibility. You need to design a mechanism to propagate the type information from a child node to its parent node. For example, you need to propagate the type of the result of an expression to a BinaryOperatorNode, so that it can check whether its operation is legal or not.
+
+Therefore, you may need to implement a class/struct to represent the type of P language and then store it in an ExpressionNode or somewhere else to propagate the type information.
+
 ## What Should Your Parser Do?
 
 If the input file is syntactically and semantically correct, output the following message.
@@ -311,10 +375,50 @@ Notice that semantic errors should **not** cause the parser to stop its executio
 
 In this assignment, you have to do the following tasks:
 
-- Revise `parser.y` and add some modules (e.g., `SymbolTable.[hc]`, `SemanticAnalyzer.[hc]`) to perform a semantic analysis.
+- Revise `scanner.l`, `parser.y`, and add some modules (e.g., `SymbolTable.[hc]`, `SemanticAnalyzer.[hc]`) to perform a semantic analysis.
 - Write a report in `report/README.md`. The report should at least describe the changes you have made in `parser.y` and the abilities of your AST.
 
 If you want to preview your report in GitHub style markdown before pushing to GitHub, [`grip`](https://github.com/joeyespo/grip) might be the tool you need.
+
+## Assessment Rubrics (Grading)
+
+Total of 100 points, with 15 point available bonus points.
+(115 pts is the maximum grade you could get in this assignment)
+
++ Passing all test cases (60 pts)
++ Passing all hidden test cases (35 pts)
++ Report (5 pts)
++ Bonus
+  + Preserving symbol tables for multi-pass (+10 pts)
+  + No memory leak in your program (+5 pts)
+
+**Please note down what bonus you have done in your report.**
+
+## Build and Execute
+
+- Build: `cd src && make clean && make`
+- Execute: `./parser [input file]`
+- Test: `cd test && python3 test.py`
+
+### Build Project
+
+TA would use `src/Makefile` to build your project by simply typing `make clean && make` on CS workstation. You have to make sure that it will generate an executable named '`parser`'. **No further grading will be made if the `make` process fails or the executable '`parser`' is not found.**
+
+### Test your parser
+
+We provide some basic tests in the test folder. Simply `cd` to test folder and type `python3 test.py` to test your parser. You can also type `python3 test.py --help` to know what arguments you can set. For example, you can add argument "--symbol" or "--sema" to test the cases of symbol table or semantic analyses.
+
+The objective we provide sample test cases is making sure your parser outputs in correct format and parses program correctly. You will get at least **60 pts** if you pass all the test cases.
+
+Please use `student_` as the prefix of your own tests to prevent TAs from overriding your files. For example: `student_identifier_test`.
+
+If you pass all test cases, you will get:
+
+<img src="./imgs/pass.png" width="360">
+
+You will get the following output messages if your parser outputs a wrong format (A blue line with a prefix sample: shows a sample solution, and a green line with a prefix yours: is your output):
+
+<img src="./imgs/error.png" width="360">
 
 ## Submitting the Assignment
 
