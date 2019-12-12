@@ -12,9 +12,4 @@
         }                                                                      \
     } while (0)
 
-struct __Location;
-
-void logSemanticError(const struct __Location *location, const char *format,
-                      ...);
-
 #endif
