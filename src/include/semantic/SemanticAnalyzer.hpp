@@ -33,6 +33,7 @@ class SemanticAnalyzer : public ASTVisitorBase
 
         class SymbolTable* getSymbolTable(); 
         int  semantic_error;
+        void  output_err_msg();
 
     private: // TODO
         class SymbolTable* symbol_table_root;
@@ -42,7 +43,8 @@ class SemanticAnalyzer : public ASTVisitorBase
         std::string filename;
         FILE* fp;
         int  dump_enable;
-        
+        std::string error_msg;
+
         void  level_up();
         void  level_down();
 };

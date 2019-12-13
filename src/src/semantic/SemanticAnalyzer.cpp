@@ -31,6 +31,8 @@ SemanticAnalyzer::SemanticAnalyzer(){
     this->symbol_table_root = nullptr;
     this->current_scope     = nullptr;
     this->level             = 0;
+    this->semantic_error = 0;
+    this->error_msg = "";
 }
 
 SemanticAnalyzer::SemanticAnalyzer(string _filename, FILE* _fp, int _dump_enable){
@@ -52,12 +54,13 @@ SemanticAnalyzer::SemanticAnalyzer(string _filename, FILE* _fp, int _dump_enable
     this->dump_enable = _dump_enable;
 
     this->semantic_error = 0;
+    this->error_msg = "";
 }
 
 void SemanticAnalyzer::level_up(){this->level++;}
 void SemanticAnalyzer::level_down(){this->level--;}
 SymbolTable* SemanticAnalyzer::getSymbolTable(){return this->symbol_table_root;}
-
+void SemanticAnalyzer::output_err_msg(){cout<<this->error_msg;}
 //
 // TODO: Dump Function
 //
@@ -181,29 +184,45 @@ void dumpSymbol_Bottom(){
 // Error Message
 //
 
-void src_notation_msg(FILE* fp, uint32_t line_num, uint32_t col_num){
+string src_notation_msg(FILE* fp, uint32_t line_num, uint32_t col_num){
+    string temp="";
     char buffer[1024];
     fseek( fp, 0, SEEK_SET ); // Back to Start
     for(uint i=0; i<line_num; i++){
         fgets(buffer, 1024, fp);
     }
 
-    cout << "    " << buffer;
+    temp+="    ";
+    temp+=string(buffer);
 
-    cout << "    ";
-    for(uint i=0; i<col_num-1; i++) cout << " ";
-    cout<<"^"<<endl;
+    temp+="    ";
+    for(uint i=0; i<col_num-1; i++) temp+=" ";
+
+    temp+="^\n";
+    return temp;
 }
 
-void redeclare_error_msg(uint32_t x, uint32_t y, string symbol_name){
-    cout << "<Error> Found in line "<< x << ", column " << y 
-         << ": symbol '" << symbol_name << "' is redeclared" << endl;
+string redeclare_error_msg(uint32_t x, uint32_t y, string symbol_name){
+    string temp="";
+    temp+="<Error> Found in line ";
+    temp+=to_string(x);
+    temp+=", column ";
+    temp+=to_string(y);
+    temp+=": symbol '";
+    temp+=symbol_name;
+    temp+="' is redeclared";
+    temp+="\n";
+    return temp;
 }
 
-void error_found_msg(uint32_t x, uint32_t y){
-    cout << "<Error> Found in line "<< x
-         << ", column "<< y
-         << ": ";
+string error_found_msg(uint32_t x, uint32_t y){
+    string temp="";
+    temp+="<Error> Found in line ";
+    temp+=to_string(x);
+    temp+=", column ";
+    temp+=to_string(y);
+    temp+=": ";
+    return temp;
 }
 //
 // TODO: implementations of visit(xxxxNode *)
@@ -218,8 +237,8 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
     if(current_scope->redeclare_check(m->program_name) == false ){
         // Error: Redeclare
         this->semantic_error = 1;
-        redeclare_error_msg(m->line_number, m->col_number, m->program_name);
-        src_notation_msg(this->fp, m->line_number, m->col_number);
+        this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->program_name);
+        this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
         
     } else {
         VariableInfo tmpInfo;
@@ -266,16 +285,16 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
     // Semantic Analyses of Program Node
     if(m->program_name != this->filename){
         this->semantic_error = 1;
-        error_found_msg(m->line_number, m->col_number);
-        cout << "program name must be the same as filename" << endl;
-        src_notation_msg(this->fp, m->line_number, m->col_number);
+        this->error_msg+=error_found_msg(m->line_number, m->col_number);
+        this->error_msg+="program name must be the same as filename\n";
+        this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
     }
 
     if(m->program_name != m->end_name){
         this->semantic_error = 1;
-        error_found_msg(m->end_line_number, m->end_col_number);
-        cout << "identifier at the end of program must be the same as identifier at the beginning of program" << endl;
-        src_notation_msg(this->fp, m->end_line_number, m->end_col_number);
+        this->error_msg+=error_found_msg(m->end_line_number, m->end_col_number);
+        this->error_msg+="identifier at the end of program must be the same as identifier at the beginning of program\n";
+        this->error_msg+=src_notation_msg(this->fp, m->end_line_number, m->end_col_number);
     }
 
 }

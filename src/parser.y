@@ -1180,7 +1180,9 @@ int main(int argc, const char *argv[]) {
            "|---------------------------------------------|\n"
            "|  There is no syntactic and semantic error!  |\n"
            "|---------------------------------------------|\n");
-    
+    else
+    visitor.output_err_msg();
+
     // Memory_Free
     delete AST;
     //free(yytext);
