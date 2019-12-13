@@ -23,6 +23,7 @@ char Buffer[MAX_LINE_LENG];
 
 static int32_t OptSrc = 1;
 static int32_t OptTok = 1;
+int32_t OptDum = 1;
 static char StringLiteral[MAX_LINE_LENG];
 static char *BufferPtr = Buffer;
 
@@ -129,7 +130,7 @@ float {integer}\.(0|[0-9]*[1-9])
 [ \t]+ { LIST; }
 
     /* Pseudocomment */
-"//&"[ST][+-].* {
+"//&"[STD][+-].* {
     LIST;
     char option = yytext[3];
     switch (option) {
@@ -138,6 +139,9 @@ float {integer}\.(0|[0-9]*[1-9])
         break;
     case 'T':
         OptTok = (yytext[4] == '+') ? 1 : 0;
+        break;
+    case 'D':
+        OptDum = (yytext[4] == '+') ? 1 : 0;
         break;
     }
 }

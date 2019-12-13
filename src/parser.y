@@ -43,6 +43,7 @@ typedef struct YYLTYPE {
 /* Declared by scanner.l */
 extern int32_t LineNum;
 extern char Buffer[512];
+extern int32_t OptDum;
 
 /* Declared by lex */
 extern FILE *yyin;
@@ -85,6 +86,7 @@ static Node AST;
 %code requires { #include "AST/return.hpp" }
 %code requires { #include "AST/function_call.hpp" }
 %code requires { #include "visitor/visitor.hpp" }
+%code requires { #include "semantic/SemanticAnalyzer.hpp" }
 
     /* Union Define */
 %union {
@@ -1147,6 +1149,7 @@ void dumpAST(ASTNodeBase* node){
     node->accept(visitor);
 }
 
+
 int main(int argc, const char *argv[]) {
     CHECK((argc >= 2) && (argc<=3), "Usage: ./parser <filename> [--dump-ast]\n");
     
@@ -1169,17 +1172,21 @@ int main(int argc, const char *argv[]) {
         dumpAST(AST);
 
 	// TODO: construct a SemanticAnalyzer to analyze the AST
+    SemanticAnalyzer visitor(string(argv[1]), fp, OptDum);
+    AST->accept(visitor);
 
+    if(visitor.semantic_error == 0)
+    printf("\n"
+           "|---------------------------------------------|\n"
+           "|  There is no syntactic and semantic error!  |\n"
+           "|---------------------------------------------|\n");
+    
     // Memory_Free
     delete AST;
     //free(yytext);
     fclose(fp);
     yylex_destroy();
     // Memory_Free_END
-
-    printf("\n"
-           "|--------------------------------|\n"
-           "|  There is no syntactic error!  |\n"
-           "|--------------------------------|\n");
+    
     return 0;
 }

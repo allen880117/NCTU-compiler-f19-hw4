@@ -1,0 +1,2683 @@
+終端機在文法中未使用
+
+   DEF
+
+
+文法
+
+    0 $accept: Program $end
+
+    1 Program: ProgramName SEMICOLON DeclarationList FunctionList CompoundStatement END ProgramName
+
+    2 ProgramName: ID
+
+    3 DeclarationList: Epsilon
+    4                | Declarations
+
+    5 Declarations: Declaration
+    6             | Declarations Declaration
+
+    7 FunctionList: Epsilon
+    8             | Functions
+
+    9 Functions: FunctionDeclaration
+   10          | Functions FunctionDeclaration
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType SEMICOLON CompoundStatement END FunctionName
+
+   12 FunctionName: ID
+
+   13 FormalArgList: Epsilon
+   14              | FormalArgs
+
+   15 FormalArgs: FormalArg
+   16           | FormalArgs SEMICOLON FormalArg
+
+   17 FormalArg: IdList COLON Type
+
+   18 IdList: ID
+   19       | IdList COMMA ID
+
+   20 ReturnType: COLON ScalarType
+   21           | Epsilon
+
+   22 Declaration: VAR IdList COLON TypeOrConstant SEMICOLON
+
+   23 TypeOrConstant: Type
+   24               | LiteralConstant
+
+   25 Type: ScalarType
+   26     | ArrType
+
+   27 ScalarType: INTEGER
+   28           | REAL
+   29           | STRING
+   30           | BOOLEAN
+
+   31 ArrType: ArrDecl ScalarType
+
+   32 ArrDecl: ARRAY INT_LITERAL TO INT_LITERAL OF
+   33        | ArrDecl ARRAY INT_LITERAL TO INT_LITERAL OF
+
+   34 LiteralConstant: INT_LITERAL
+   35                | REAL_LITERAL
+   36                | STRING_LITERAL
+   37                | TRUE
+   38                | FALSE
+
+   39 Statement: CompoundStatement
+   40          | Simple
+   41          | Condition
+   42          | While
+   43          | For
+   44          | Return
+   45          | FunctionInvokation
+
+   46 CompoundStatement: BEGIN_ DeclarationList StatementList END
+
+   47 Simple: VariableReference ASSIGN Expression SEMICOLON
+   48       | PRINT Expression SEMICOLON
+   49       | READ VariableReference SEMICOLON
+
+   50 VariableReference: ID
+   51                  | ID ArrForm
+
+   52 ArrForm: L_BRACKET Expression R_BRACKET
+   53        | ArrForm L_BRACKET Expression R_BRACKET
+
+   54 Condition: IF Expression THEN StatementList ElseOrNot END IF
+
+   55 ElseOrNot: ELSE StatementList
+   56          | Epsilon
+
+   57 While: WHILE Expression DO StatementList END DO
+
+   58 For: FOR ID ASSIGN INT_LITERAL TO INT_LITERAL DO StatementList END DO
+
+   59 Return: RETURN Expression SEMICOLON
+
+   60 FunctionInvokation: FunctionCall SEMICOLON
+
+   61 FunctionCall: ID L_PARENTHESIS ExpressionList R_PARENTHESIS
+
+   62 ExpressionList: Epsilon
+   63               | Expressions
+
+   64 Expressions: Expression
+   65            | Expressions COMMA Expression
+
+   66 StatementList: Epsilon
+   67              | Statements
+
+   68 Statements: Statement
+   69           | Statements Statement
+
+   70 Expression: L_PARENTHESIS Expression R_PARENTHESIS
+   71           | MINUS Expression
+   72           | Expression MULTIPLY Expression
+   73           | Expression DIVIDE Expression
+   74           | Expression MOD Expression
+   75           | Expression PLUS Expression
+   76           | Expression MINUS Expression
+   77           | Expression LESS Expression
+   78           | Expression LESS_OR_EQUAL Expression
+   79           | Expression GREATER Expression
+   80           | Expression GREATER_OR_EQUAL Expression
+   81           | Expression EQUAL Expression
+   82           | Expression NOT_EQUAL Expression
+   83           | NOT Expression
+   84           | Expression AND Expression
+   85           | Expression OR Expression
+   86           | LiteralConstant
+   87           | VariableReference
+   88           | FunctionCall
+
+   89 Epsilon: %empty
+
+
+終結語詞，附有它們出現處的規則
+
+$end (0) 0
+error (256)
+COMMA (258) 19 65
+SEMICOLON (259) 1 11 16 22 47 48 49 59 60
+COLON (260) 17 20 22
+L_PARENTHESIS (261) 11 61 70
+R_PARENTHESIS (262) 11 61 70
+L_BRACKET (263) 52 53
+R_BRACKET (264) 52 53
+ASSIGN (265) 47 58
+OR (266) 85
+AND (267) 84
+NOT (268) 83
+LESS (269) 77
+LESS_OR_EQUAL (270) 78
+EQUAL (271) 81
+GREATER (272) 79
+GREATER_OR_EQUAL (273) 80
+NOT_EQUAL (274) 82
+PLUS (275) 75
+MINUS (276) 71 76
+MULTIPLY (277) 72
+DIVIDE (278) 73
+MOD (279) 74
+UNARY_MINUS (280)
+ARRAY (281) 32 33
+BOOLEAN (282) 30
+INTEGER (283) 27
+REAL (284) 28
+STRING (285) 29
+END (286) 1 11 46 54 57 58
+BEGIN_ (287) 46
+DO (288) 57 58
+ELSE (289) 55
+FOR (290) 58
+IF (291) 54
+THEN (292) 54
+WHILE (293) 57
+DEF (294)
+OF (295) 32 33
+TO (296) 32 33 58
+RETURN (297) 59
+VAR (298) 22
+FALSE (299) 38
+TRUE (300) 37
+PRINT (301) 48
+READ (302) 49
+ID (303) 2 12 18 19 50 51 58 61
+INT_LITERAL (304) 32 33 34 58
+REAL_LITERAL (305) 35
+STRING_LITERAL (306) 36
+
+
+非終結語詞，附有它們出現處的規則
+
+$accept (52)
+    於左側： 0
+Program (53)
+    於左側： 1, 於右側： 0
+ProgramName (54)
+    於左側： 2, 於右側： 1
+DeclarationList (55)
+    於左側： 3 4, 於右側： 1 46
+Declarations (56)
+    於左側： 5 6, 於右側： 4 6
+FunctionList (57)
+    於左側： 7 8, 於右側： 1
+Functions (58)
+    於左側： 9 10, 於右側： 8 10
+FunctionDeclaration (59)
+    於左側： 11, 於右側： 9 10
+FunctionName (60)
+    於左側： 12, 於右側： 11
+FormalArgList (61)
+    於左側： 13 14, 於右側： 11
+FormalArgs (62)
+    於左側： 15 16, 於右側： 14 16
+FormalArg (63)
+    於左側： 17, 於右側： 15 16
+IdList (64)
+    於左側： 18 19, 於右側： 17 19 22
+ReturnType (65)
+    於左側： 20 21, 於右側： 11
+Declaration (66)
+    於左側： 22, 於右側： 5 6
+TypeOrConstant (67)
+    於左側： 23 24, 於右側： 22
+Type (68)
+    於左側： 25 26, 於右側： 17 23
+ScalarType (69)
+    於左側： 27 28 29 30, 於右側： 20 25 31
+ArrType (70)
+    於左側： 31, 於右側： 26
+ArrDecl (71)
+    於左側： 32 33, 於右側： 31 33
+LiteralConstant (72)
+    於左側： 34 35 36 37 38, 於右側： 24 86
+Statement (73)
+    於左側： 39 40 41 42 43 44 45, 於右側： 68 69
+CompoundStatement (74)
+    於左側： 46, 於右側： 1 11 39
+Simple (75)
+    於左側： 47 48 49, 於右側： 40
+VariableReference (76)
+    於左側： 50 51, 於右側： 47 49 87
+ArrForm (77)
+    於左側： 52 53, 於右側： 51 53
+Condition (78)
+    於左側： 54, 於右側： 41
+ElseOrNot (79)
+    於左側： 55 56, 於右側： 54
+While (80)
+    於左側： 57, 於右側： 42
+For (81)
+    於左側： 58, 於右側： 43
+Return (82)
+    於左側： 59, 於右側： 44
+FunctionInvokation (83)
+    於左側： 60, 於右側： 45
+FunctionCall (84)
+    於左側： 61, 於右側： 60 88
+ExpressionList (85)
+    於左側： 62 63, 於右側： 61
+Expressions (86)
+    於左側： 64 65, 於右側： 63 65
+StatementList (87)
+    於左側： 66 67, 於右側： 46 54 55 57 58
+Statements (88)
+    於左側： 68 69, 於右側： 67 69
+Expression (89)
+    於左側： 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86
+    87 88, 於右側： 47 48 52 53 54 57 59 64 65 70 71 72 73 74 75
+    76 77 78 79 80 81 82 83 84 85
+Epsilon (90)
+    於左側： 89, 於右側： 3 7 13 21 56 62 66
+
+
+狀態 0
+
+    0 $accept: . Program $end
+
+    ID  偏移，並進入狀態 1
+
+    Program      進入狀態 2
+    ProgramName  進入狀態 3
+
+
+狀態 1
+
+    2 ProgramName: ID .
+
+    $預設  使用規則 2 以縮減 (ProgramName)
+
+
+狀態 2
+
+    0 $accept: Program . $end
+
+    $end  偏移，並進入狀態 4
+
+
+狀態 3
+
+    1 Program: ProgramName . SEMICOLON DeclarationList FunctionList CompoundStatement END ProgramName
+
+    SEMICOLON  偏移，並進入狀態 5
+
+
+狀態 4
+
+    0 $accept: Program $end .
+
+    $預設  接受
+
+
+狀態 5
+
+    1 Program: ProgramName SEMICOLON . DeclarationList FunctionList CompoundStatement END ProgramName
+
+    VAR  偏移，並進入狀態 6
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    DeclarationList  進入狀態 7
+    Declarations     進入狀態 8
+    Declaration      進入狀態 9
+    Epsilon          進入狀態 10
+
+
+狀態 6
+
+   22 Declaration: VAR . IdList COLON TypeOrConstant SEMICOLON
+
+    ID  偏移，並進入狀態 11
+
+    IdList  進入狀態 12
+
+
+狀態 7
+
+    1 Program: ProgramName SEMICOLON DeclarationList . FunctionList CompoundStatement END ProgramName
+
+    ID  偏移，並進入狀態 13
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    FunctionList         進入狀態 14
+    Functions            進入狀態 15
+    FunctionDeclaration  進入狀態 16
+    FunctionName         進入狀態 17
+    Epsilon              進入狀態 18
+
+
+狀態 8
+
+    4 DeclarationList: Declarations .
+    6 Declarations: Declarations . Declaration
+
+    VAR  偏移，並進入狀態 6
+
+    $預設  使用規則 4 以縮減 (DeclarationList)
+
+    Declaration  進入狀態 19
+
+
+狀態 9
+
+    5 Declarations: Declaration .
+
+    $預設  使用規則 5 以縮減 (Declarations)
+
+
+狀態 10
+
+    3 DeclarationList: Epsilon .
+
+    $預設  使用規則 3 以縮減 (DeclarationList)
+
+
+狀態 11
+
+   18 IdList: ID .
+
+    $預設  使用規則 18 以縮減 (IdList)
+
+
+狀態 12
+
+   19 IdList: IdList . COMMA ID
+   22 Declaration: VAR IdList . COLON TypeOrConstant SEMICOLON
+
+    COMMA  偏移，並進入狀態 20
+    COLON  偏移，並進入狀態 21
+
+
+狀態 13
+
+   12 FunctionName: ID .
+
+    $預設  使用規則 12 以縮減 (FunctionName)
+
+
+狀態 14
+
+    1 Program: ProgramName SEMICOLON DeclarationList FunctionList . CompoundStatement END ProgramName
+
+    BEGIN_  偏移，並進入狀態 22
+
+    CompoundStatement  進入狀態 23
+
+
+狀態 15
+
+    8 FunctionList: Functions .
+   10 Functions: Functions . FunctionDeclaration
+
+    ID  偏移，並進入狀態 13
+
+    $預設  使用規則 8 以縮減 (FunctionList)
+
+    FunctionDeclaration  進入狀態 24
+    FunctionName         進入狀態 17
+
+
+狀態 16
+
+    9 Functions: FunctionDeclaration .
+
+    $預設  使用規則 9 以縮減 (Functions)
+
+
+狀態 17
+
+   11 FunctionDeclaration: FunctionName . L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType SEMICOLON CompoundStatement END FunctionName
+
+    L_PARENTHESIS  偏移，並進入狀態 25
+
+
+狀態 18
+
+    7 FunctionList: Epsilon .
+
+    $預設  使用規則 7 以縮減 (FunctionList)
+
+
+狀態 19
+
+    6 Declarations: Declarations Declaration .
+
+    $預設  使用規則 6 以縮減 (Declarations)
+
+
+狀態 20
+
+   19 IdList: IdList COMMA . ID
+
+    ID  偏移，並進入狀態 26
+
+
+狀態 21
+
+   22 Declaration: VAR IdList COLON . TypeOrConstant SEMICOLON
+
+    ARRAY           偏移，並進入狀態 27
+    BOOLEAN         偏移，並進入狀態 28
+    INTEGER         偏移，並進入狀態 29
+    REAL            偏移，並進入狀態 30
+    STRING          偏移，並進入狀態 31
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    TypeOrConstant   進入狀態 37
+    Type             進入狀態 38
+    ScalarType       進入狀態 39
+    ArrType          進入狀態 40
+    ArrDecl          進入狀態 41
+    LiteralConstant  進入狀態 42
+
+
+狀態 22
+
+   46 CompoundStatement: BEGIN_ . DeclarationList StatementList END
+
+    VAR  偏移，並進入狀態 6
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    DeclarationList  進入狀態 43
+    Declarations     進入狀態 8
+    Declaration      進入狀態 9
+    Epsilon          進入狀態 10
+
+
+狀態 23
+
+    1 Program: ProgramName SEMICOLON DeclarationList FunctionList CompoundStatement . END ProgramName
+
+    END  偏移，並進入狀態 44
+
+
+狀態 24
+
+   10 Functions: Functions FunctionDeclaration .
+
+    $預設  使用規則 10 以縮減 (Functions)
+
+
+狀態 25
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS . FormalArgList R_PARENTHESIS ReturnType SEMICOLON CompoundStatement END FunctionName
+
+    ID  偏移，並進入狀態 11
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    FormalArgList  進入狀態 45
+    FormalArgs     進入狀態 46
+    FormalArg      進入狀態 47
+    IdList         進入狀態 48
+    Epsilon        進入狀態 49
+
+
+狀態 26
+
+   19 IdList: IdList COMMA ID .
+
+    $預設  使用規則 19 以縮減 (IdList)
+
+
+狀態 27
+
+   32 ArrDecl: ARRAY . INT_LITERAL TO INT_LITERAL OF
+
+    INT_LITERAL  偏移，並進入狀態 50
+
+
+狀態 28
+
+   30 ScalarType: BOOLEAN .
+
+    $預設  使用規則 30 以縮減 (ScalarType)
+
+
+狀態 29
+
+   27 ScalarType: INTEGER .
+
+    $預設  使用規則 27 以縮減 (ScalarType)
+
+
+狀態 30
+
+   28 ScalarType: REAL .
+
+    $預設  使用規則 28 以縮減 (ScalarType)
+
+
+狀態 31
+
+   29 ScalarType: STRING .
+
+    $預設  使用規則 29 以縮減 (ScalarType)
+
+
+狀態 32
+
+   38 LiteralConstant: FALSE .
+
+    $預設  使用規則 38 以縮減 (LiteralConstant)
+
+
+狀態 33
+
+   37 LiteralConstant: TRUE .
+
+    $預設  使用規則 37 以縮減 (LiteralConstant)
+
+
+狀態 34
+
+   34 LiteralConstant: INT_LITERAL .
+
+    $預設  使用規則 34 以縮減 (LiteralConstant)
+
+
+狀態 35
+
+   35 LiteralConstant: REAL_LITERAL .
+
+    $預設  使用規則 35 以縮減 (LiteralConstant)
+
+
+狀態 36
+
+   36 LiteralConstant: STRING_LITERAL .
+
+    $預設  使用規則 36 以縮減 (LiteralConstant)
+
+
+狀態 37
+
+   22 Declaration: VAR IdList COLON TypeOrConstant . SEMICOLON
+
+    SEMICOLON  偏移，並進入狀態 51
+
+
+狀態 38
+
+   23 TypeOrConstant: Type .
+
+    $預設  使用規則 23 以縮減 (TypeOrConstant)
+
+
+狀態 39
+
+   25 Type: ScalarType .
+
+    $預設  使用規則 25 以縮減 (Type)
+
+
+狀態 40
+
+   26 Type: ArrType .
+
+    $預設  使用規則 26 以縮減 (Type)
+
+
+狀態 41
+
+   31 ArrType: ArrDecl . ScalarType
+   33 ArrDecl: ArrDecl . ARRAY INT_LITERAL TO INT_LITERAL OF
+
+    ARRAY    偏移，並進入狀態 52
+    BOOLEAN  偏移，並進入狀態 28
+    INTEGER  偏移，並進入狀態 29
+    REAL     偏移，並進入狀態 30
+    STRING   偏移，並進入狀態 31
+
+    ScalarType  進入狀態 53
+
+
+狀態 42
+
+   24 TypeOrConstant: LiteralConstant .
+
+    $預設  使用規則 24 以縮減 (TypeOrConstant)
+
+
+狀態 43
+
+   46 CompoundStatement: BEGIN_ DeclarationList . StatementList END
+
+    BEGIN_  偏移，並進入狀態 22
+    FOR     偏移，並進入狀態 54
+    IF      偏移，並進入狀態 55
+    WHILE   偏移，並進入狀態 56
+    RETURN  偏移，並進入狀態 57
+    PRINT   偏移，並進入狀態 58
+    READ    偏移，並進入狀態 59
+    ID      偏移，並進入狀態 60
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    Statement           進入狀態 61
+    CompoundStatement   進入狀態 62
+    Simple              進入狀態 63
+    VariableReference   進入狀態 64
+    Condition           進入狀態 65
+    While               進入狀態 66
+    For                 進入狀態 67
+    Return              進入狀態 68
+    FunctionInvokation  進入狀態 69
+    FunctionCall        進入狀態 70
+    StatementList       進入狀態 71
+    Statements          進入狀態 72
+    Epsilon             進入狀態 73
+
+
+狀態 44
+
+    1 Program: ProgramName SEMICOLON DeclarationList FunctionList CompoundStatement END . ProgramName
+
+    ID  偏移，並進入狀態 1
+
+    ProgramName  進入狀態 74
+
+
+狀態 45
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS FormalArgList . R_PARENTHESIS ReturnType SEMICOLON CompoundStatement END FunctionName
+
+    R_PARENTHESIS  偏移，並進入狀態 75
+
+
+狀態 46
+
+   14 FormalArgList: FormalArgs .
+   16 FormalArgs: FormalArgs . SEMICOLON FormalArg
+
+    SEMICOLON  偏移，並進入狀態 76
+
+    $預設  使用規則 14 以縮減 (FormalArgList)
+
+
+狀態 47
+
+   15 FormalArgs: FormalArg .
+
+    $預設  使用規則 15 以縮減 (FormalArgs)
+
+
+狀態 48
+
+   17 FormalArg: IdList . COLON Type
+   19 IdList: IdList . COMMA ID
+
+    COMMA  偏移，並進入狀態 20
+    COLON  偏移，並進入狀態 77
+
+
+狀態 49
+
+   13 FormalArgList: Epsilon .
+
+    $預設  使用規則 13 以縮減 (FormalArgList)
+
+
+狀態 50
+
+   32 ArrDecl: ARRAY INT_LITERAL . TO INT_LITERAL OF
+
+    TO  偏移，並進入狀態 78
+
+
+狀態 51
+
+   22 Declaration: VAR IdList COLON TypeOrConstant SEMICOLON .
+
+    $預設  使用規則 22 以縮減 (Declaration)
+
+
+狀態 52
+
+   33 ArrDecl: ArrDecl ARRAY . INT_LITERAL TO INT_LITERAL OF
+
+    INT_LITERAL  偏移，並進入狀態 79
+
+
+狀態 53
+
+   31 ArrType: ArrDecl ScalarType .
+
+    $預設  使用規則 31 以縮減 (ArrType)
+
+
+狀態 54
+
+   58 For: FOR . ID ASSIGN INT_LITERAL TO INT_LITERAL DO StatementList END DO
+
+    ID  偏移，並進入狀態 80
+
+
+狀態 55
+
+   54 Condition: IF . Expression THEN StatementList ElseOrNot END IF
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 87
+
+
+狀態 56
+
+   57 While: WHILE . Expression DO StatementList END DO
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 88
+
+
+狀態 57
+
+   59 Return: RETURN . Expression SEMICOLON
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 89
+
+
+狀態 58
+
+   48 Simple: PRINT . Expression SEMICOLON
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 90
+
+
+狀態 59
+
+   49 Simple: READ . VariableReference SEMICOLON
+
+    ID  偏移，並進入狀態 91
+
+    VariableReference  進入狀態 92
+
+
+狀態 60
+
+   50 VariableReference: ID .
+   51                  | ID . ArrForm
+   61 FunctionCall: ID . L_PARENTHESIS ExpressionList R_PARENTHESIS
+
+    L_PARENTHESIS  偏移，並進入狀態 93
+    L_BRACKET      偏移，並進入狀態 94
+
+    $預設  使用規則 50 以縮減 (VariableReference)
+
+    ArrForm  進入狀態 95
+
+
+狀態 61
+
+   68 Statements: Statement .
+
+    $預設  使用規則 68 以縮減 (Statements)
+
+
+狀態 62
+
+   39 Statement: CompoundStatement .
+
+    $預設  使用規則 39 以縮減 (Statement)
+
+
+狀態 63
+
+   40 Statement: Simple .
+
+    $預設  使用規則 40 以縮減 (Statement)
+
+
+狀態 64
+
+   47 Simple: VariableReference . ASSIGN Expression SEMICOLON
+
+    ASSIGN  偏移，並進入狀態 96
+
+
+狀態 65
+
+   41 Statement: Condition .
+
+    $預設  使用規則 41 以縮減 (Statement)
+
+
+狀態 66
+
+   42 Statement: While .
+
+    $預設  使用規則 42 以縮減 (Statement)
+
+
+狀態 67
+
+   43 Statement: For .
+
+    $預設  使用規則 43 以縮減 (Statement)
+
+
+狀態 68
+
+   44 Statement: Return .
+
+    $預設  使用規則 44 以縮減 (Statement)
+
+
+狀態 69
+
+   45 Statement: FunctionInvokation .
+
+    $預設  使用規則 45 以縮減 (Statement)
+
+
+狀態 70
+
+   60 FunctionInvokation: FunctionCall . SEMICOLON
+
+    SEMICOLON  偏移，並進入狀態 97
+
+
+狀態 71
+
+   46 CompoundStatement: BEGIN_ DeclarationList StatementList . END
+
+    END  偏移，並進入狀態 98
+
+
+狀態 72
+
+   67 StatementList: Statements .
+   69 Statements: Statements . Statement
+
+    BEGIN_  偏移，並進入狀態 22
+    FOR     偏移，並進入狀態 54
+    IF      偏移，並進入狀態 55
+    WHILE   偏移，並進入狀態 56
+    RETURN  偏移，並進入狀態 57
+    PRINT   偏移，並進入狀態 58
+    READ    偏移，並進入狀態 59
+    ID      偏移，並進入狀態 60
+
+    $預設  使用規則 67 以縮減 (StatementList)
+
+    Statement           進入狀態 99
+    CompoundStatement   進入狀態 62
+    Simple              進入狀態 63
+    VariableReference   進入狀態 64
+    Condition           進入狀態 65
+    While               進入狀態 66
+    For                 進入狀態 67
+    Return              進入狀態 68
+    FunctionInvokation  進入狀態 69
+    FunctionCall        進入狀態 70
+
+
+狀態 73
+
+   66 StatementList: Epsilon .
+
+    $預設  使用規則 66 以縮減 (StatementList)
+
+
+狀態 74
+
+    1 Program: ProgramName SEMICOLON DeclarationList FunctionList CompoundStatement END ProgramName .
+
+    $預設  使用規則 1 以縮減 (Program)
+
+
+狀態 75
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS . ReturnType SEMICOLON CompoundStatement END FunctionName
+
+    COLON  偏移，並進入狀態 100
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    ReturnType  進入狀態 101
+    Epsilon     進入狀態 102
+
+
+狀態 76
+
+   16 FormalArgs: FormalArgs SEMICOLON . FormalArg
+
+    ID  偏移，並進入狀態 11
+
+    FormalArg  進入狀態 103
+    IdList     進入狀態 48
+
+
+狀態 77
+
+   17 FormalArg: IdList COLON . Type
+
+    ARRAY    偏移，並進入狀態 27
+    BOOLEAN  偏移，並進入狀態 28
+    INTEGER  偏移，並進入狀態 29
+    REAL     偏移，並進入狀態 30
+    STRING   偏移，並進入狀態 31
+
+    Type        進入狀態 104
+    ScalarType  進入狀態 39
+    ArrType     進入狀態 40
+    ArrDecl     進入狀態 41
+
+
+狀態 78
+
+   32 ArrDecl: ARRAY INT_LITERAL TO . INT_LITERAL OF
+
+    INT_LITERAL  偏移，並進入狀態 105
+
+
+狀態 79
+
+   33 ArrDecl: ArrDecl ARRAY INT_LITERAL . TO INT_LITERAL OF
+
+    TO  偏移，並進入狀態 106
+
+
+狀態 80
+
+   58 For: FOR ID . ASSIGN INT_LITERAL TO INT_LITERAL DO StatementList END DO
+
+    ASSIGN  偏移，並進入狀態 107
+
+
+狀態 81
+
+   70 Expression: L_PARENTHESIS . Expression R_PARENTHESIS
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 108
+
+
+狀態 82
+
+   83 Expression: NOT . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 109
+
+
+狀態 83
+
+   71 Expression: MINUS . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 110
+
+
+狀態 84
+
+   86 Expression: LiteralConstant .
+
+    $預設  使用規則 86 以縮減 (Expression)
+
+
+狀態 85
+
+   87 Expression: VariableReference .
+
+    $預設  使用規則 87 以縮減 (Expression)
+
+
+狀態 86
+
+   88 Expression: FunctionCall .
+
+    $預設  使用規則 88 以縮減 (Expression)
+
+
+狀態 87
+
+   54 Condition: IF Expression . THEN StatementList ElseOrNot END IF
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+    THEN              偏移，並進入狀態 124
+
+
+狀態 88
+
+   57 While: WHILE Expression . DO StatementList END DO
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+    DO                偏移，並進入狀態 125
+
+
+狀態 89
+
+   59 Return: RETURN Expression . SEMICOLON
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    SEMICOLON         偏移，並進入狀態 126
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+
+狀態 90
+
+   48 Simple: PRINT Expression . SEMICOLON
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    SEMICOLON         偏移，並進入狀態 127
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+
+狀態 91
+
+   50 VariableReference: ID .
+   51                  | ID . ArrForm
+
+    L_BRACKET  偏移，並進入狀態 94
+
+    $預設  使用規則 50 以縮減 (VariableReference)
+
+    ArrForm  進入狀態 95
+
+
+狀態 92
+
+   49 Simple: READ VariableReference . SEMICOLON
+
+    SEMICOLON  偏移，並進入狀態 128
+
+
+狀態 93
+
+   61 FunctionCall: ID L_PARENTHESIS . ExpressionList R_PARENTHESIS
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    ExpressionList     進入狀態 129
+    Expressions        進入狀態 130
+    Expression         進入狀態 131
+    Epsilon            進入狀態 132
+
+
+狀態 94
+
+   52 ArrForm: L_BRACKET . Expression R_BRACKET
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 133
+
+
+狀態 95
+
+   51 VariableReference: ID ArrForm .
+   53 ArrForm: ArrForm . L_BRACKET Expression R_BRACKET
+
+    L_BRACKET  偏移，並進入狀態 134
+
+    $預設  使用規則 51 以縮減 (VariableReference)
+
+
+狀態 96
+
+   47 Simple: VariableReference ASSIGN . Expression SEMICOLON
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 135
+
+
+狀態 97
+
+   60 FunctionInvokation: FunctionCall SEMICOLON .
+
+    $預設  使用規則 60 以縮減 (FunctionInvokation)
+
+
+狀態 98
+
+   46 CompoundStatement: BEGIN_ DeclarationList StatementList END .
+
+    $預設  使用規則 46 以縮減 (CompoundStatement)
+
+
+狀態 99
+
+   69 Statements: Statements Statement .
+
+    $預設  使用規則 69 以縮減 (Statements)
+
+
+狀態 100
+
+   20 ReturnType: COLON . ScalarType
+
+    BOOLEAN  偏移，並進入狀態 28
+    INTEGER  偏移，並進入狀態 29
+    REAL     偏移，並進入狀態 30
+    STRING   偏移，並進入狀態 31
+
+    ScalarType  進入狀態 136
+
+
+狀態 101
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType . SEMICOLON CompoundStatement END FunctionName
+
+    SEMICOLON  偏移，並進入狀態 137
+
+
+狀態 102
+
+   21 ReturnType: Epsilon .
+
+    $預設  使用規則 21 以縮減 (ReturnType)
+
+
+狀態 103
+
+   16 FormalArgs: FormalArgs SEMICOLON FormalArg .
+
+    $預設  使用規則 16 以縮減 (FormalArgs)
+
+
+狀態 104
+
+   17 FormalArg: IdList COLON Type .
+
+    $預設  使用規則 17 以縮減 (FormalArg)
+
+
+狀態 105
+
+   32 ArrDecl: ARRAY INT_LITERAL TO INT_LITERAL . OF
+
+    OF  偏移，並進入狀態 138
+
+
+狀態 106
+
+   33 ArrDecl: ArrDecl ARRAY INT_LITERAL TO . INT_LITERAL OF
+
+    INT_LITERAL  偏移，並進入狀態 139
+
+
+狀態 107
+
+   58 For: FOR ID ASSIGN . INT_LITERAL TO INT_LITERAL DO StatementList END DO
+
+    INT_LITERAL  偏移，並進入狀態 140
+
+
+狀態 108
+
+   70 Expression: L_PARENTHESIS Expression . R_PARENTHESIS
+   72           | Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    R_PARENTHESIS     偏移，並進入狀態 141
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+
+狀態 109
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   83           | NOT Expression .
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+    $預設  使用規則 83 以縮減 (Expression)
+
+
+狀態 110
+
+   71 Expression: MINUS Expression .
+   72           | Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    $預設  使用規則 71 以縮減 (Expression)
+
+
+狀態 111
+
+   85 Expression: Expression OR . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 142
+
+
+狀態 112
+
+   84 Expression: Expression AND . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 143
+
+
+狀態 113
+
+   77 Expression: Expression LESS . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 144
+
+
+狀態 114
+
+   78 Expression: Expression LESS_OR_EQUAL . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 145
+
+
+狀態 115
+
+   81 Expression: Expression EQUAL . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 146
+
+
+狀態 116
+
+   79 Expression: Expression GREATER . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 147
+
+
+狀態 117
+
+   80 Expression: Expression GREATER_OR_EQUAL . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 148
+
+
+狀態 118
+
+   82 Expression: Expression NOT_EQUAL . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 149
+
+
+狀態 119
+
+   75 Expression: Expression PLUS . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 150
+
+
+狀態 120
+
+   76 Expression: Expression MINUS . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 151
+
+
+狀態 121
+
+   72 Expression: Expression MULTIPLY . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 152
+
+
+狀態 122
+
+   73 Expression: Expression DIVIDE . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 153
+
+
+狀態 123
+
+   74 Expression: Expression MOD . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 154
+
+
+狀態 124
+
+   54 Condition: IF Expression THEN . StatementList ElseOrNot END IF
+
+    BEGIN_  偏移，並進入狀態 22
+    FOR     偏移，並進入狀態 54
+    IF      偏移，並進入狀態 55
+    WHILE   偏移，並進入狀態 56
+    RETURN  偏移，並進入狀態 57
+    PRINT   偏移，並進入狀態 58
+    READ    偏移，並進入狀態 59
+    ID      偏移，並進入狀態 60
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    Statement           進入狀態 61
+    CompoundStatement   進入狀態 62
+    Simple              進入狀態 63
+    VariableReference   進入狀態 64
+    Condition           進入狀態 65
+    While               進入狀態 66
+    For                 進入狀態 67
+    Return              進入狀態 68
+    FunctionInvokation  進入狀態 69
+    FunctionCall        進入狀態 70
+    StatementList       進入狀態 155
+    Statements          進入狀態 72
+    Epsilon             進入狀態 73
+
+
+狀態 125
+
+   57 While: WHILE Expression DO . StatementList END DO
+
+    BEGIN_  偏移，並進入狀態 22
+    FOR     偏移，並進入狀態 54
+    IF      偏移，並進入狀態 55
+    WHILE   偏移，並進入狀態 56
+    RETURN  偏移，並進入狀態 57
+    PRINT   偏移，並進入狀態 58
+    READ    偏移，並進入狀態 59
+    ID      偏移，並進入狀態 60
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    Statement           進入狀態 61
+    CompoundStatement   進入狀態 62
+    Simple              進入狀態 63
+    VariableReference   進入狀態 64
+    Condition           進入狀態 65
+    While               進入狀態 66
+    For                 進入狀態 67
+    Return              進入狀態 68
+    FunctionInvokation  進入狀態 69
+    FunctionCall        進入狀態 70
+    StatementList       進入狀態 156
+    Statements          進入狀態 72
+    Epsilon             進入狀態 73
+
+
+狀態 126
+
+   59 Return: RETURN Expression SEMICOLON .
+
+    $預設  使用規則 59 以縮減 (Return)
+
+
+狀態 127
+
+   48 Simple: PRINT Expression SEMICOLON .
+
+    $預設  使用規則 48 以縮減 (Simple)
+
+
+狀態 128
+
+   49 Simple: READ VariableReference SEMICOLON .
+
+    $預設  使用規則 49 以縮減 (Simple)
+
+
+狀態 129
+
+   61 FunctionCall: ID L_PARENTHESIS ExpressionList . R_PARENTHESIS
+
+    R_PARENTHESIS  偏移，並進入狀態 157
+
+
+狀態 130
+
+   63 ExpressionList: Expressions .
+   65 Expressions: Expressions . COMMA Expression
+
+    COMMA  偏移，並進入狀態 158
+
+    $預設  使用規則 63 以縮減 (ExpressionList)
+
+
+狀態 131
+
+   64 Expressions: Expression .
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+    $預設  使用規則 64 以縮減 (Expressions)
+
+
+狀態 132
+
+   62 ExpressionList: Epsilon .
+
+    $預設  使用規則 62 以縮減 (ExpressionList)
+
+
+狀態 133
+
+   52 ArrForm: L_BRACKET Expression . R_BRACKET
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    R_BRACKET         偏移，並進入狀態 159
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+
+狀態 134
+
+   53 ArrForm: ArrForm L_BRACKET . Expression R_BRACKET
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 160
+
+
+狀態 135
+
+   47 Simple: VariableReference ASSIGN Expression . SEMICOLON
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    SEMICOLON         偏移，並進入狀態 161
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+
+狀態 136
+
+   20 ReturnType: COLON ScalarType .
+
+    $預設  使用規則 20 以縮減 (ReturnType)
+
+
+狀態 137
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType SEMICOLON . CompoundStatement END FunctionName
+
+    BEGIN_  偏移，並進入狀態 22
+
+    CompoundStatement  進入狀態 162
+
+
+狀態 138
+
+   32 ArrDecl: ARRAY INT_LITERAL TO INT_LITERAL OF .
+
+    $預設  使用規則 32 以縮減 (ArrDecl)
+
+
+狀態 139
+
+   33 ArrDecl: ArrDecl ARRAY INT_LITERAL TO INT_LITERAL . OF
+
+    OF  偏移，並進入狀態 163
+
+
+狀態 140
+
+   58 For: FOR ID ASSIGN INT_LITERAL . TO INT_LITERAL DO StatementList END DO
+
+    TO  偏移，並進入狀態 164
+
+
+狀態 141
+
+   70 Expression: L_PARENTHESIS Expression R_PARENTHESIS .
+
+    $預設  使用規則 70 以縮減 (Expression)
+
+
+狀態 142
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+   85           | Expression OR Expression .
+
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+    $預設  使用規則 85 以縮減 (Expression)
+
+
+狀態 143
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   84           | Expression AND Expression .
+   85           | Expression . OR Expression
+
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+    $預設  使用規則 84 以縮減 (Expression)
+
+
+狀態 144
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   77           | Expression LESS Expression .
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    PLUS      偏移，並進入狀態 119
+    MINUS     偏移，並進入狀態 120
+    MULTIPLY  偏移，並進入狀態 121
+    DIVIDE    偏移，並進入狀態 122
+    MOD       偏移，並進入狀態 123
+
+    $預設  使用規則 77 以縮減 (Expression)
+
+
+狀態 145
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   78           | Expression LESS_OR_EQUAL Expression .
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    PLUS      偏移，並進入狀態 119
+    MINUS     偏移，並進入狀態 120
+    MULTIPLY  偏移，並進入狀態 121
+    DIVIDE    偏移，並進入狀態 122
+    MOD       偏移，並進入狀態 123
+
+    $預設  使用規則 78 以縮減 (Expression)
+
+
+狀態 146
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   81           | Expression EQUAL Expression .
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    PLUS      偏移，並進入狀態 119
+    MINUS     偏移，並進入狀態 120
+    MULTIPLY  偏移，並進入狀態 121
+    DIVIDE    偏移，並進入狀態 122
+    MOD       偏移，並進入狀態 123
+
+    $預設  使用規則 81 以縮減 (Expression)
+
+
+狀態 147
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   79           | Expression GREATER Expression .
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    PLUS      偏移，並進入狀態 119
+    MINUS     偏移，並進入狀態 120
+    MULTIPLY  偏移，並進入狀態 121
+    DIVIDE    偏移，並進入狀態 122
+    MOD       偏移，並進入狀態 123
+
+    $預設  使用規則 79 以縮減 (Expression)
+
+
+狀態 148
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   80           | Expression GREATER_OR_EQUAL Expression .
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    PLUS      偏移，並進入狀態 119
+    MINUS     偏移，並進入狀態 120
+    MULTIPLY  偏移，並進入狀態 121
+    DIVIDE    偏移，並進入狀態 122
+    MOD       偏移，並進入狀態 123
+
+    $預設  使用規則 80 以縮減 (Expression)
+
+
+狀態 149
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   82           | Expression NOT_EQUAL Expression .
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    PLUS      偏移，並進入狀態 119
+    MINUS     偏移，並進入狀態 120
+    MULTIPLY  偏移，並進入狀態 121
+    DIVIDE    偏移，並進入狀態 122
+    MOD       偏移，並進入狀態 123
+
+    $預設  使用規則 82 以縮減 (Expression)
+
+
+狀態 150
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   75           | Expression PLUS Expression .
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    MULTIPLY  偏移，並進入狀態 121
+    DIVIDE    偏移，並進入狀態 122
+    MOD       偏移，並進入狀態 123
+
+    $預設  使用規則 75 以縮減 (Expression)
+
+
+狀態 151
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   76           | Expression MINUS Expression .
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    MULTIPLY  偏移，並進入狀態 121
+    DIVIDE    偏移，並進入狀態 122
+    MOD       偏移，並進入狀態 123
+
+    $預設  使用規則 76 以縮減 (Expression)
+
+
+狀態 152
+
+   72 Expression: Expression . MULTIPLY Expression
+   72           | Expression MULTIPLY Expression .
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    $預設  使用規則 72 以縮減 (Expression)
+
+
+狀態 153
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   73           | Expression DIVIDE Expression .
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    $預設  使用規則 73 以縮減 (Expression)
+
+
+狀態 154
+
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   74           | Expression MOD Expression .
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    $預設  使用規則 74 以縮減 (Expression)
+
+
+狀態 155
+
+   54 Condition: IF Expression THEN StatementList . ElseOrNot END IF
+
+    ELSE  偏移，並進入狀態 165
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    ElseOrNot  進入狀態 166
+    Epsilon    進入狀態 167
+
+
+狀態 156
+
+   57 While: WHILE Expression DO StatementList . END DO
+
+    END  偏移，並進入狀態 168
+
+
+狀態 157
+
+   61 FunctionCall: ID L_PARENTHESIS ExpressionList R_PARENTHESIS .
+
+    $預設  使用規則 61 以縮減 (FunctionCall)
+
+
+狀態 158
+
+   65 Expressions: Expressions COMMA . Expression
+
+    L_PARENTHESIS   偏移，並進入狀態 81
+    NOT             偏移，並進入狀態 82
+    MINUS           偏移，並進入狀態 83
+    FALSE           偏移，並進入狀態 32
+    TRUE            偏移，並進入狀態 33
+    ID              偏移，並進入狀態 60
+    INT_LITERAL     偏移，並進入狀態 34
+    REAL_LITERAL    偏移，並進入狀態 35
+    STRING_LITERAL  偏移，並進入狀態 36
+
+    LiteralConstant    進入狀態 84
+    VariableReference  進入狀態 85
+    FunctionCall       進入狀態 86
+    Expression         進入狀態 169
+
+
+狀態 159
+
+   52 ArrForm: L_BRACKET Expression R_BRACKET .
+
+    $預設  使用規則 52 以縮減 (ArrForm)
+
+
+狀態 160
+
+   53 ArrForm: ArrForm L_BRACKET Expression . R_BRACKET
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    R_BRACKET         偏移，並進入狀態 170
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+
+狀態 161
+
+   47 Simple: VariableReference ASSIGN Expression SEMICOLON .
+
+    $預設  使用規則 47 以縮減 (Simple)
+
+
+狀態 162
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType SEMICOLON CompoundStatement . END FunctionName
+
+    END  偏移，並進入狀態 171
+
+
+狀態 163
+
+   33 ArrDecl: ArrDecl ARRAY INT_LITERAL TO INT_LITERAL OF .
+
+    $預設  使用規則 33 以縮減 (ArrDecl)
+
+
+狀態 164
+
+   58 For: FOR ID ASSIGN INT_LITERAL TO . INT_LITERAL DO StatementList END DO
+
+    INT_LITERAL  偏移，並進入狀態 172
+
+
+狀態 165
+
+   55 ElseOrNot: ELSE . StatementList
+
+    BEGIN_  偏移，並進入狀態 22
+    FOR     偏移，並進入狀態 54
+    IF      偏移，並進入狀態 55
+    WHILE   偏移，並進入狀態 56
+    RETURN  偏移，並進入狀態 57
+    PRINT   偏移，並進入狀態 58
+    READ    偏移，並進入狀態 59
+    ID      偏移，並進入狀態 60
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    Statement           進入狀態 61
+    CompoundStatement   進入狀態 62
+    Simple              進入狀態 63
+    VariableReference   進入狀態 64
+    Condition           進入狀態 65
+    While               進入狀態 66
+    For                 進入狀態 67
+    Return              進入狀態 68
+    FunctionInvokation  進入狀態 69
+    FunctionCall        進入狀態 70
+    StatementList       進入狀態 173
+    Statements          進入狀態 72
+    Epsilon             進入狀態 73
+
+
+狀態 166
+
+   54 Condition: IF Expression THEN StatementList ElseOrNot . END IF
+
+    END  偏移，並進入狀態 174
+
+
+狀態 167
+
+   56 ElseOrNot: Epsilon .
+
+    $預設  使用規則 56 以縮減 (ElseOrNot)
+
+
+狀態 168
+
+   57 While: WHILE Expression DO StatementList END . DO
+
+    DO  偏移，並進入狀態 175
+
+
+狀態 169
+
+   65 Expressions: Expressions COMMA Expression .
+   72 Expression: Expression . MULTIPLY Expression
+   73           | Expression . DIVIDE Expression
+   74           | Expression . MOD Expression
+   75           | Expression . PLUS Expression
+   76           | Expression . MINUS Expression
+   77           | Expression . LESS Expression
+   78           | Expression . LESS_OR_EQUAL Expression
+   79           | Expression . GREATER Expression
+   80           | Expression . GREATER_OR_EQUAL Expression
+   81           | Expression . EQUAL Expression
+   82           | Expression . NOT_EQUAL Expression
+   84           | Expression . AND Expression
+   85           | Expression . OR Expression
+
+    OR                偏移，並進入狀態 111
+    AND               偏移，並進入狀態 112
+    LESS              偏移，並進入狀態 113
+    LESS_OR_EQUAL     偏移，並進入狀態 114
+    EQUAL             偏移，並進入狀態 115
+    GREATER           偏移，並進入狀態 116
+    GREATER_OR_EQUAL  偏移，並進入狀態 117
+    NOT_EQUAL         偏移，並進入狀態 118
+    PLUS              偏移，並進入狀態 119
+    MINUS             偏移，並進入狀態 120
+    MULTIPLY          偏移，並進入狀態 121
+    DIVIDE            偏移，並進入狀態 122
+    MOD               偏移，並進入狀態 123
+
+    $預設  使用規則 65 以縮減 (Expressions)
+
+
+狀態 170
+
+   53 ArrForm: ArrForm L_BRACKET Expression R_BRACKET .
+
+    $預設  使用規則 53 以縮減 (ArrForm)
+
+
+狀態 171
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType SEMICOLON CompoundStatement END . FunctionName
+
+    ID  偏移，並進入狀態 13
+
+    FunctionName  進入狀態 176
+
+
+狀態 172
+
+   58 For: FOR ID ASSIGN INT_LITERAL TO INT_LITERAL . DO StatementList END DO
+
+    DO  偏移，並進入狀態 177
+
+
+狀態 173
+
+   55 ElseOrNot: ELSE StatementList .
+
+    $預設  使用規則 55 以縮減 (ElseOrNot)
+
+
+狀態 174
+
+   54 Condition: IF Expression THEN StatementList ElseOrNot END . IF
+
+    IF  偏移，並進入狀態 178
+
+
+狀態 175
+
+   57 While: WHILE Expression DO StatementList END DO .
+
+    $預設  使用規則 57 以縮減 (While)
+
+
+狀態 176
+
+   11 FunctionDeclaration: FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType SEMICOLON CompoundStatement END FunctionName .
+
+    $預設  使用規則 11 以縮減 (FunctionDeclaration)
+
+
+狀態 177
+
+   58 For: FOR ID ASSIGN INT_LITERAL TO INT_LITERAL DO . StatementList END DO
+
+    BEGIN_  偏移，並進入狀態 22
+    FOR     偏移，並進入狀態 54
+    IF      偏移，並進入狀態 55
+    WHILE   偏移，並進入狀態 56
+    RETURN  偏移，並進入狀態 57
+    PRINT   偏移，並進入狀態 58
+    READ    偏移，並進入狀態 59
+    ID      偏移，並進入狀態 60
+
+    $預設  使用規則 89 以縮減 (Epsilon)
+
+    Statement           進入狀態 61
+    CompoundStatement   進入狀態 62
+    Simple              進入狀態 63
+    VariableReference   進入狀態 64
+    Condition           進入狀態 65
+    While               進入狀態 66
+    For                 進入狀態 67
+    Return              進入狀態 68
+    FunctionInvokation  進入狀態 69
+    FunctionCall        進入狀態 70
+    StatementList       進入狀態 179
+    Statements          進入狀態 72
+    Epsilon             進入狀態 73
+
+
+狀態 178
+
+   54 Condition: IF Expression THEN StatementList ElseOrNot END IF .
+
+    $預設  使用規則 54 以縮減 (Condition)
+
+
+狀態 179
+
+   58 For: FOR ID ASSIGN INT_LITERAL TO INT_LITERAL DO StatementList . END DO
+
+    END  偏移，並進入狀態 180
+
+
+狀態 180
+
+   58 For: FOR ID ASSIGN INT_LITERAL TO INT_LITERAL DO StatementList END . DO
+
+    DO  偏移，並進入狀態 181
+
+
+狀態 181
+
+   58 For: FOR ID ASSIGN INT_LITERAL TO INT_LITERAL DO StatementList END DO .
+
+    $預設  使用規則 58 以縮減 (For)

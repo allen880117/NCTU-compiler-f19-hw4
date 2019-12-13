@@ -14,8 +14,12 @@ AST := $(shell find $(ASTDIR) -name '*.cpp')
 VISITORDIR = src/visitor/
 VISITOR := $(shell find $(VISITORDIR) -name '*.cpp')
 
+SEMANTICDIR = src/semantic/
+SEMANTIC := $(shell find $(SEMANTICDIR) -name '*.cpp')
+
 SRC := $(AST) \
-       $(VISITOR)
+       $(VISITOR) \
+	   $(SEMANTIC)
 
 EXEC = $(PARSER)
 OBJS = $(PARSER:=.cpp) \
