@@ -1,5 +1,6 @@
 #pragma once
 #include "visitor/visitor.hpp"
+#include "AST/ast.hpp"
 #include "semantic/SymbolTable.hpp"
 #include <vector>
 #include <string>
@@ -64,4 +65,9 @@ class SemanticAnalyzer : public ASTVisitorBase
         void  pop_src_node();
 
         void  dump_symbol_table_util(SymbolTable* enter);
+
+        bool  check_symbol_inside(string _name);
+        SymbolEntry get_symbol_entry(string _name);
+
+        stack<VariableInfo> expression_stack;
 };

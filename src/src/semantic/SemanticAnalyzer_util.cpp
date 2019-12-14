@@ -35,7 +35,7 @@ SemanticAnalyzer::SemanticAnalyzer(string _filename, FILE* _fp){
     this->level             = 0;
 
     _filename = _filename.substr(0, _filename.length()-2);
-    for(uint i=_filename.length()-1; i>=0; i--){
+    for(int i=_filename.length()-1; i>=0; i--){
         if(_filename[i] == '/' ){
             _filename = _filename.substr(i+1, _filename.length()-i);
             break;
@@ -98,4 +98,33 @@ void SemanticAnalyzer::dump_symbol_table_util(SymbolTable* enter){
             dumpSymbol_Body(enter->entry[enter->entry_name[i]]);
     dumpSymbol_Bottom();
 
+}
+
+bool SemanticAnalyzer::check_symbol_inside(string _name){
+    bool found = false;
+    SymbolTable* current = this->current_scope;
+    while(true){
+        if(current->entry[_name].is_used == true){
+            found = true;
+            break;
+        } else {
+            if(current->level == 0) break;
+            else current = current->prev_scope;
+        }
+    }
+    return found;
+}
+
+SymbolEntry SemanticAnalyzer::get_symbol_entry(string _name){
+    SymbolEntry temp;
+    SymbolTable* current = this->current_scope;
+    while(true){
+        if(current->entry[_name].is_used == true){
+            return current->entry[_name];
+        } else {
+            if(current->level == 0) break;
+            else current = current->prev_scope;
+        }
+    }
+    return temp; // Won't Happen .... Maybe
 }

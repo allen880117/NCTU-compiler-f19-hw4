@@ -28,7 +28,8 @@ SymbolEntry::SymbolEntry(
     FieldKind _kind,
     unsigned int _level,
     VariableInfo _type,
-    Attribute _attribute
+    Attribute _attribute,
+    enum NODE_TABLE _node_type
     ){
         if(_name.length() > 32) this->name = _name.substr(0, 32);
         else                    this->name = _name;
@@ -38,6 +39,7 @@ SymbolEntry::SymbolEntry(
         this->attribute = _attribute;
 
         this->is_used = true;
+        this->node_type = _node_type;
     }
 
 SymbolTable::SymbolTable(unsigned int _level){

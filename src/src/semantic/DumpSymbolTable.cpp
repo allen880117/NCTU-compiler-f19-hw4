@@ -8,6 +8,58 @@ using namespace std;
 // TODO: Dump Function
 //
 
+bool array_size_check(VariableInfo lhs, VariableInfo rhs){
+    if(lhs.type_set == rhs.type_set){
+        if(lhs.type == rhs.type){
+            if(lhs.array_range.size() == rhs.array_range.size()){
+                for(uint i=0; i<lhs.array_range.size(); i++){
+                    int lhs_size = (int)lhs.array_range[i].end - (int)lhs.array_range[i].start;
+                    int rhs_size = (int)rhs.array_range[i].end - (int)rhs.array_range[i].start;
+                    if(lhs_size != rhs_size)
+                        return false;
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// false for error has happened
+bool fault_type_check(VariableInfo input){
+    if(input.type_set == UNKNOWN_SET || input.type == UNKNOWN_TYPE)
+        return false;
+    else
+        return true;
+}
+
+bool type_check(VariableInfo input, enum enumTypeSet type_set, enum enumType type){
+    if(input.type_set == type_set && input.type == type) return true;
+    else return false;
+}
+
+string op_convert(enum enumOperator op){
+    string temp = "";
+    switch(op){
+        case OP_OR:               temp="or"; break;
+        case OP_AND:              temp="and"; break;
+        case OP_NOT:              temp="not"; break;
+        case OP_LESS:             temp="<"; break;
+        case OP_LESS_OR_EQUAL:    temp="<="; break;
+        case OP_EQUAL:            temp="="; break;
+        case OP_GREATER:          temp=">"; break;
+        case OP_GREATER_OR_EQUAL: temp=">="; break;
+        case OP_NOT_EQUAL:        temp="<>"; break;
+        case OP_PLUS:             temp="+"; break;
+        case OP_MINUS:            temp="-"; break;
+        case OP_MULTIPLY:         temp="*"; break;
+        case OP_DIVIDE:           temp="/"; break;
+        case OP_MOD:              temp="mod"; break;
+        default:                  temp="unknown"; break;
+    }
+    return temp;
+}
+
 string info_convert(VariableInfo input){
     string msg = "";
     switch(input.type_set){
@@ -32,7 +84,7 @@ string info_convert(VariableInfo input){
             msg += " ";
             for(uint i=0; i<input.array_range.size(); i++){
                 msg += "[";
-                msg += to_string(input.array_range[i].end-input.array_range[i].start);
+                msg += to_string((int)input.array_range[i].end-(int)input.array_range[i].start);
                 msg += "]";
             }
             break;

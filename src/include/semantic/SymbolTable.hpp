@@ -38,13 +38,34 @@ enum FieldKind{
 
 class SymbolEntry{
     public:
+        // Public Info
         string       name; // size = 1 to 32
         FieldKind    kind;
         unsigned int level;
         VariableInfo type;
         Attribute    attribute;
 
+        // Hide Info
         bool         is_used;
+        enum NODE_TABLE node_type;
+        
+        class ProgramNode* program_node;
+        //class DeclarationNode* declaration_node;
+        class VariableNode* variable_node;
+        //class ConstantValueNode* constant_value_node;
+        class FunctionNode* function_node; 
+        //class CompoundStatementNode* compound_statement_node;
+        //class AssignmentNode* assignment_node;
+        //class PrintNode* print_node;
+        //class ReadNode* read_node;
+        //class VariableReferenceNode* variable_reference_node;
+        //class BinaryOperatorNode* binary_operator_node;
+        //class UnaryOperatorNode* unary_operator_node;
+        //class IfNode* if_node;
+        //class WhileNode* while_node;
+        //class ForNode* for_node;
+        //class ReturnNode* return_node;
+        //class FunctionCallNode* function_call_node;
 
     public:
         SymbolEntry();
@@ -53,7 +74,8 @@ class SymbolEntry{
             FieldKind _kind,
             unsigned int _level,
             VariableInfo _type,
-            Attribute _attribute );
+            Attribute _attribute,
+            enum NODE_TABLE _node_type);
 };
 
 class SymbolTable{
