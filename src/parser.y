@@ -19,6 +19,9 @@
 #include "AST/function_call.hpp"
 #include "AST/ASTDumper.hpp"
 #include "semantic/SemanticAnalyzer.hpp"
+#include "semantic/SymbolTable.hpp"
+#include "semantic/ErrorMsg.hpp"
+#include "semantic/DumpSymbolTable.hpp"
 #include "core/error.h"
 
 #include <stdio.h>
@@ -87,6 +90,9 @@ static Node AST;
 %code requires { #include "AST/function_call.hpp" }
 %code requires { #include "visitor/visitor.hpp" }
 %code requires { #include "semantic/SemanticAnalyzer.hpp" }
+%code requires { #include "semantic/SymbolTable.hpp" }
+%code requires { #include "semantic/ErrorMsg.hpp" }
+%code requires { #include "semantic/DumpSymbolTable.hpp" }
 
     /* Union Define */
 %union {
@@ -1147,7 +1153,6 @@ void dumpAST(ASTNodeBase* node){
     node->accept(visitor);
 }
 
-
 int main(int argc, const char *argv[]) {
     CHECK((argc >= 2) && (argc<=3), "Usage: ./parser <filename> [--dump-ast]\n");
     
@@ -1170,9 +1175,13 @@ int main(int argc, const char *argv[]) {
         dumpAST(AST);
 
 	// TODO: construct a SemanticAnalyzer to analyze the AST
-    SemanticAnalyzer visitor(string(argv[1]), fp, OptDum);
+    SemanticAnalyzer visitor(string(argv[1]), fp);
     AST->accept(visitor);
 
+    if(OptDum == 1){
+        visitor.dump_symbol_table();
+    }
+    
     if(visitor.is_semantic_error() == 0)
     printf("\n"
            "|---------------------------------------------|\n"

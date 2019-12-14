@@ -58,26 +58,20 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
     }
 
     // Visit Child Nodes
-    if (m->declaration_node_list != nullptr)
-        for(uint i=0; i< m->declaration_node_list->size(); i++){
-            (*(m->declaration_node_list))[i]->accept(*this);
-        }
+    this->push_src_node(PROGRAM_NODE);
+        if (m->declaration_node_list != nullptr)
+            for(uint i=0; i< m->declaration_node_list->size(); i++){
+                (*(m->declaration_node_list))[i]->accept(*this);
+            }
 
-    if (m->function_node_list != nullptr)
-        for(uint i=0; i< m->function_node_list->size(); i++){
-            (*(m->function_node_list))[i]->accept(*this);
-        }
+        if (m->function_node_list != nullptr)
+            for(uint i=0; i< m->function_node_list->size(); i++){
+                (*(m->function_node_list))[i]->accept(*this);
+            }
 
-    if (m->compound_statement_node != nullptr)
-        m->compound_statement_node->accept(*this);
-        
-    // Output Symbol
-    if (dump_enable == 1){
-        dumpSymbol_Header();
-        for(uint i=0; i<this->current_scope->entry_name.size(); i++)
-            dumpSymbol_Body(this->current_scope->entry[this->current_scope->entry_name[i]]);
-        dumpSymbol_Bottom();
-    }
+        if (m->compound_statement_node != nullptr)
+            m->compound_statement_node->accept(*this);
+    this->pop_src_node();
 
     // Semantic Analyses of Program Node
     if(m->program_name != this->filename){
@@ -100,11 +94,12 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
 
 void SemanticAnalyzer::visit(DeclarationNode *m) {
     // Visit Child Nodes
-    this->specify_off();
-    if (m->variables_node_list != nullptr)
-        for(uint i=0; i< m->variables_node_list->size(); i++){
-            (*(m->variables_node_list))[i]->accept(*this);
-        }
+    this->push_src_node(DECLARATION_NODE);
+        if (m->variables_node_list != nullptr)
+            for(uint i=0; i< m->variables_node_list->size(); i++){
+                (*(m->variables_node_list))[i]->accept(*this);
+            }
+    this->pop_src_node();
 }
 
 void SemanticAnalyzer::visit(VariableNode *m) {
@@ -213,9 +208,27 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
     SymbolTable* new_scope = new SymbolTable(this->level);
     this->push(new_scope);
 
-    // Push Entry
-
-
+    // Visit Child Node
+    this->push_src_node(FUNCTION_NODE);
+        this->specify_on(KIND_PARAMETER);
+            if (m->parameters != nullptr)
+                for(uint i=0; i< m->parameters->size(); i++){
+                    (*(m->parameters))[i]->node->accept(*this);
+                }
+        this->specify_off();
+        
+            if (m->body != nullptr)
+                m->body->accept(*this);
+    
+    this->pop_src_node();
+   
+    // Semantic Check
+    if (m->function_name != m->end_name){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->end_line_number, m->end_col_number);
+        this->error_msg+="identifier at the end of function must be the same as identifier at the beginning of function\n";
+        this->error_msg+=src_notation_msg(this->fp, m->end_line_number, m->end_col_number);
+    }
 
     // Pop Scope
     this->pop();
@@ -224,10 +237,10 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
 
 void SemanticAnalyzer::visit(CompoundStatementNode *m) {
     // Push Scope
-    if(this->compound_level_up_need) this->level_up();
+    if(this->src_node.top() == FUNCTION_NODE) this->level_up();
 
     // Pop Scope
-    if(this->compound_level_up_need) this->level_down();
+    if(this->src_node.top() == FUNCTION_NODE) this->level_down();
 }
 
 void SemanticAnalyzer::visit(AssignmentNode *m) {}

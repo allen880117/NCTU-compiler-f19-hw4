@@ -1,7 +1,6 @@
 #pragma once
 #include "AST/ast.hpp"
 
-
 // Forward declaration
 class ProgramNode;
 class DeclarationNode;
@@ -20,6 +19,28 @@ class WhileNode;
 class ForNode;
 class ReturnNode;
 class FunctionCallNode;
+
+// Enum Nodes
+enum NODE_TABLE {
+    PROGRAM_NODE = 117,
+    DECLARATION_NODE,
+    VARIABLE_NODE,
+    CONSTANT_VALUE_NODE,
+    FUNCTION_NODE,
+    COMPOUND_STATEMENT_NODE,
+    ASSIGNMENT_NODE,
+    PRINT_NODE,
+    READ_NODE,
+    VARIABLE_REFERENCE_NODE,
+    BINARY_OPERATOR_NODE,
+    UNARY_OPERATOR_NODE,
+    IF_NODE,
+    WHILE_NODE,
+    FOR_NODE,
+    RETURN_NODE,
+    FUNCTION_CALL_NODE,
+    UNKNOWN_NODE,
+};
 
 class ASTVisitorBase
 {

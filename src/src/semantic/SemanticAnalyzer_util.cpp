@@ -29,7 +29,7 @@ using namespace std;
 // TODO: implementations of constructor and destructor
 //
 
-SemanticAnalyzer::SemanticAnalyzer(string _filename, FILE* _fp, int _dump_enable){
+SemanticAnalyzer::SemanticAnalyzer(string _filename, FILE* _fp){
     this->symbol_table_root = new SymbolTable(0);
     this->current_scope     = this->symbol_table_root;
     this->level             = 0;
@@ -43,15 +43,12 @@ SemanticAnalyzer::SemanticAnalyzer(string _filename, FILE* _fp, int _dump_enable
     }
     this->filename = _filename;
     this->fp = _fp;
-    this->dump_enable = _dump_enable;
 
     this->semantic_error = 0;
     this->error_msg = "";
 
     this->specify = false;
     this->specify_kind = KIND_UNKNOWN;
-
-    this->compound_level_up_need = true;
 }
 
 void SemanticAnalyzer::level_up(){this->level++;}
@@ -60,6 +57,10 @@ void SemanticAnalyzer::output_err_msg(){cout<<this->error_msg;}
 int  SemanticAnalyzer::is_semantic_error(){return this->semantic_error;}
 
 SymbolTable* SemanticAnalyzer::get_symbol_table(){return this->symbol_table_root;}
+
+void SemanticAnalyzer::dump_symbol_table(){
+    this->dump_symbol_table_util(this->symbol_table_root->next_scope_list[0]);
+}
 
 void SemanticAnalyzer::push(SymbolTable* _new_scope){
     _new_scope->prev_scope = this->current_scope;
@@ -79,10 +80,22 @@ void SemanticAnalyzer::specify_off(){
     this->specify = false;
 }
 
-void SemanticAnalyzer::compound_level_up_need_on(){
-    this->compound_level_up_need = true;
+void SemanticAnalyzer::push_src_node(NODE_TABLE _node){
+    this->src_node.push(_node);
 }
 
-void SemanticAnalyzer::compound_level_up_need_off(){
-    this->compound_level_up_need = false;
+void SemanticAnalyzer::pop_src_node(){
+    this->src_node.pop();
+}
+
+void SemanticAnalyzer::dump_symbol_table_util(SymbolTable* enter){
+    
+    for(uint i=0; i<enter->next_scope_list.size(); i++)
+        dump_symbol_table_util(enter->next_scope_list[i]);
+
+    dumpSymbol_Header();
+        for(uint i=0; i<enter->entry_name.size(); i++)
+            dumpSymbol_Body(enter->entry[enter->entry_name[i]]);
+    dumpSymbol_Bottom();
+
 }

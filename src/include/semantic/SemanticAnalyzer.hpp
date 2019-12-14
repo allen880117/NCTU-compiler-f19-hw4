@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <stack>
 using namespace std;
 // FIXME: remember to replace ";" below with ";", or your implementations in .cpp won't be compiled.
 
@@ -28,10 +29,11 @@ class SemanticAnalyzer : public ASTVisitorBase
         void visit(ReturnNode *m) override ;
         void visit(FunctionCallNode *m) override ;
         
-        SemanticAnalyzer(string _filename, FILE* _fp, int _dump_enable);
+        SemanticAnalyzer(string _filename, FILE* _fp);
         ~SemanticAnalyzer(){}
 
         class SymbolTable* get_symbol_table(); 
+        void               dump_symbol_table();
         void               output_err_msg();
         int                is_semantic_error();
 
@@ -57,7 +59,9 @@ class SemanticAnalyzer : public ASTVisitorBase
         void  specify_on(FieldKind);
         void  specify_off();
 
-        bool  compound_level_up_need;
-        void  compound_level_up_need_on();
-        void  compound_level_up_need_off();
+        stack<enum  NODE_TABLE>  src_node;
+        void  push_src_node(enum NODE_TABLE);
+        void  pop_src_node();
+
+        void  dump_symbol_table_util(SymbolTable* enter);
 };

@@ -24,6 +24,7 @@ FunctionNode::FunctionNode(
         this->body = _body;
         this->end_line_number = _end_line_number;
         this->end_col_number = _end_col_number;
+        this->end_name = _end_name;
         this->prototype = _prototype;
     }
 
