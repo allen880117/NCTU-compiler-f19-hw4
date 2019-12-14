@@ -70,4 +70,6 @@ class SemanticAnalyzer : public ASTVisitorBase
         SymbolEntry get_symbol_entry(string _name);
 
         stack<VariableInfo> expression_stack;
+
+        bool  check_loop_var(string _name);
 };

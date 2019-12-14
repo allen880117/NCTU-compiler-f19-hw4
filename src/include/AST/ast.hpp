@@ -94,6 +94,10 @@ struct NodeWithTypeList{
 class ASTNodeBase
 {
     public:
+        int line_number;
+        int col_number;
+
+    public:
         virtual void accept(class ASTVisitorBase &v) = 0;
         virtual ~ASTNodeBase(){};
 };

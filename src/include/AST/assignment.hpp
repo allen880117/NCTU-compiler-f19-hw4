@@ -5,8 +5,6 @@
 class AssignmentNode : public ASTNodeBase
 {
     public:
-        int  line_number; // :=
-        int  col_number;  // :=
         Node variable_reference_node; // Lvalue
         Node expression_node; // Expression
 

@@ -5,8 +5,6 @@
 class ReturnNode : public ASTNodeBase
 {
     public:
-        int  line_number; // return
-        int  col_number;  // return
         Node return_value; // an expression node
 
     public:

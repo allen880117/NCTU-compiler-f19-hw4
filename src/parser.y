@@ -855,7 +855,10 @@ For:
             declaration_node,
             assignment_node,
             constant_value_node2, // expression node
-            $8
+            $8,
+            string($2),
+            $4, // HW4 ADD
+            $6  // HW4 ADD
         );
 
         // Memory_Free

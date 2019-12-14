@@ -1,0 +1,24 @@
+1: //&T-
+2: //&D-
+3: ReadStatement;
+4: begin
+5:     var arr: array 1 to 10 of array 10 to 100 of integer;
+6:     var constant: 010;
+7: 
+8:     read arr[1];
+9:     read constant;
+10: 
+11:     for i := 10 to 40 do
+12:     begin
+13:         read i;
+14:         i := 10;
+15:     end
+16:     end do
+17: 
+18:     read i;
+19: end
+20: end ReadStatement
+
+|---------------------------------------------|
+|  There is no syntactic and semantic error!  |
+|---------------------------------------------|

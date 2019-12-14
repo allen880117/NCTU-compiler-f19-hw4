@@ -5,8 +5,6 @@
 class ConstantValueNode : public ASTNodeBase
 {
     public:
-        int  line_number; // constant value
-        int  col_number;  // constant value
         VariableInfo* constant_value; // Not sure its type
     
     public:

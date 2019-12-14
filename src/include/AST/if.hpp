@@ -5,8 +5,6 @@
 class IfNode : public ASTNodeBase
 {
     public:
-        int  line_number; // if
-        int  col_number;  // if
         Node condition; // an expression node
         NodeList* body; // a list of statement nodes (zero or more)
         NodeList* body_of_else; // a list of statement nodes (zero or more)

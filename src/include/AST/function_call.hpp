@@ -5,8 +5,6 @@
 class FunctionCallNode : public ASTNodeBase
 {
     public:
-        int  line_number; // function name
-        int  col_number;  // function name
         string function_name;
         NodeList* arguments; // a list of expression nodes (zero ro more);
 

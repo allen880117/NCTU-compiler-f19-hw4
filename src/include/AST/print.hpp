@@ -5,8 +5,6 @@
 class PrintNode : public ASTNodeBase
 {
     public:
-        int  line_number; // print
-        int  col_number;  // print
         Node expression_node; // Target
 
     public:

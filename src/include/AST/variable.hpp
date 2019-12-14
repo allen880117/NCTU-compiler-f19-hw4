@@ -5,8 +5,6 @@
 class VariableNode : public ASTNodeBase
 {
     public:
-        int  line_number; // variable name
-        int  col_number;  // variable name
         string variable_name;
         VariableInfo* type;
         Node constant_value_node; // constant value (zero or one)

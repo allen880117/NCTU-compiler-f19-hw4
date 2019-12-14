@@ -10,7 +10,10 @@ ForNode::ForNode(
     Node _loop_variable_declaration, 
     Node _initial_statement, 
     Node _condition, 
-    NodeList* _body
+    NodeList* _body,
+    string _loop_var_name,
+    int _lower_bound,
+    int _upper_bound
     ){
         this->line_number = _line_number;
         this->col_number = _col_number;
@@ -18,6 +21,9 @@ ForNode::ForNode(
         this->initial_statement = _initial_statement;
         this->condition = _condition;
         this->body = _body;
+        this->loop_var_name = _loop_var_name; // HW4 ADD
+        this->lower_bound = _lower_bound; // HW4 ADD
+        this->upper_bound = _upper_bound; // HW4 ADD
     }
 
 ForNode::~ForNode(){

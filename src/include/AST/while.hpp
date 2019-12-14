@@ -5,8 +5,6 @@
 class WhileNode : public ASTNodeBase
 {
     public:
-        int  line_number; // while
-        int  col_number;  // while
         Node condition; // an expression node
         NodeList* body; // a list of statement nodes (zero or more)
 

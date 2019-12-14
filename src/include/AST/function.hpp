@@ -5,8 +5,6 @@
 class FunctionNode : public ASTNodeBase
 {
     public:
-        int  line_number; // function name
-        int  col_number;  // function name
         string function_name;
         vector<NodeWithTypeList*>* parameters; // a list of declaration nodes (zero or more)
         VariableInfo* return_type;

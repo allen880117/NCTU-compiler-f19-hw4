@@ -5,8 +5,6 @@
 class ReadNode : public ASTNodeBase
 {
     public:
-        int  line_number; // print
-        int  col_number;  // print
         Node variable_reference_node; // Target
 
     public:

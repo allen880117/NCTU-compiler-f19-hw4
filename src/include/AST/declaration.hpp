@@ -5,8 +5,6 @@
 class DeclarationNode : public ASTNodeBase
 {
     public:
-        int  line_number; // var
-        int  col_number;  // var
         NodeList* variables_node_list; // Variables
     
     public:

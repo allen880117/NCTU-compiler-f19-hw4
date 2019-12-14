@@ -5,8 +5,6 @@
 class BinaryOperatorNode : public ASTNodeBase
 {
     public:
-        int  line_number; // operator
-        int  col_number;  // operator
         enumOperator op;
         Node left_operand; // an expression node
         Node right_operand; // an expression node

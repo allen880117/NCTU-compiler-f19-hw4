@@ -5,8 +5,6 @@
 class ProgramNode : public ASTNodeBase
 {
     public:
-        int  line_number; // program name
-        int  col_number;  // program name
         string program_name;
         string return_type;
         NodeList* declaration_node_list; // zero or more

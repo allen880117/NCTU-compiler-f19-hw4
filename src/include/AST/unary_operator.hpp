@@ -5,8 +5,6 @@
 class UnaryOperatorNode : public ASTNodeBase
 {
     public:
-        int  line_number; // operator
-        int  col_number;  // operator
         enumOperator op;
         Node operand; // an expression node
 

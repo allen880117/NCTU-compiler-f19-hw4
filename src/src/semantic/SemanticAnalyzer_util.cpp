@@ -100,7 +100,9 @@ void SemanticAnalyzer::dump_symbol_table_util(SymbolTable* enter){
 
 }
 
+// false -> not found
 bool SemanticAnalyzer::check_symbol_inside(string _name){
+    if(_name.length() > 32) _name = _name.substr(0,32);
     bool found = false;
     SymbolTable* current = this->current_scope;
     while(true){
@@ -127,4 +129,23 @@ SymbolEntry SemanticAnalyzer::get_symbol_entry(string _name){
         }
     }
     return temp; // Won't Happen .... Maybe
+}
+
+// true -> loop_var has been declared
+bool SemanticAnalyzer::check_loop_var(string _name){
+    if(_name.length() > 32) _name = _name.substr(0,32);
+    bool found = false;
+    SymbolTable* current = this->current_scope;
+    while(true){
+        if( current->entry[_name].is_used == true &&
+            current->entry[_name].kind == KIND_LOOP_VAR )
+        {
+            found = true;
+            break;
+        } else {
+            if(current->level == 0) break;
+            else current = current->prev_scope;
+        }
+    }
+    return found;
 }

@@ -106,69 +106,90 @@ void SemanticAnalyzer::visit(DeclarationNode *m) {
 
 void SemanticAnalyzer::visit(VariableNode *m) {
     // Push Entry
+    // New Loop Var check Old Loop Var
+    if(this->specify == true && this->specify_kind == KIND_LOOP_VAR ){
+        if( check_loop_var(m->variable_name) == true ){
+            // Loop Var has been declared
+            // Error: Redeclare
+            this->semantic_error = 1;
+            this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
+            this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+            return;
+        }
+    }
+
+    // New Variable check Old Loop Var
+    if(check_loop_var(m->variable_name) == true ){
+        // Error: Redeclare
+        this->semantic_error = 1;
+        this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
+        this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+        return;
+    } 
+
+    // New Variable check Redeclared
     if(this->current_scope->redeclare_check(m->variable_name) == false ){
         // Error: Redeclare
         this->semantic_error = 1;
         this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-        
-    } else {
-        if(this->specify == true){
-            if(m->constant_value_node == nullptr){ // Not Constant
-                SymbolEntry tmpEntry(
-                    m->variable_name, 
-                    this->specify_kind, 
-                    this->level, 
-                    *(m->type), 
-                    Attribute(NO_ATTRIBUTE),
-                    VARIABLE_NODE
-                );
-                tmpEntry.variable_node = m;
-                this->current_scope->put(tmpEntry);
-            }
-            else {
-                Attribute tempAttr(ATTRIBUTE_VALUE_OF_CONSTANT);
-                tempAttr.set_value_of_constant(*(m->type));
-                SymbolEntry tmpEntry(
-                    m->variable_name, 
-                    this->specify_kind, 
-                    this->level, 
-                    *(m->type), 
-                    tempAttr,
-                    VARIABLE_NODE
-                );
-                tmpEntry.variable_node = m;
-                this->current_scope->put(tmpEntry);
-            }
-        } else {
-            if(m->constant_value_node == nullptr){ // Not Constant
-                SymbolEntry tmpEntry(
-                    m->variable_name, 
-                    KIND_VARIABLE, 
-                    this->level, 
-                    *(m->type), 
-                    Attribute(NO_ATTRIBUTE),
-                    VARIABLE_NODE
-                );
-                tmpEntry.variable_node = m;
-                this->current_scope->put(tmpEntry);
-            }
-            else {
-                Attribute tempAttr(ATTRIBUTE_VALUE_OF_CONSTANT);
-                tempAttr.set_value_of_constant(*(m->type));
-                SymbolEntry tmpEntry(
-                    m->variable_name, 
-                    KIND_CONSTANT,
-                    this->level, 
-                    *(m->type), 
-                    tempAttr,
-                    VARIABLE_NODE
-                );
-                tmpEntry.variable_node = m;
-                this->current_scope->put(tmpEntry);
-            }
+        return;
+    } 
+
+    if(this->specify == true){
+        if(m->constant_value_node == nullptr){ // Not Constant
+            SymbolEntry tmpEntry(
+                m->variable_name, 
+                this->specify_kind, 
+                this->level, 
+                *(m->type), 
+                Attribute(NO_ATTRIBUTE),
+                VARIABLE_NODE
+            );
+            tmpEntry.variable_node = m;
+            this->current_scope->put(tmpEntry);
         }
-        
+        else {
+            Attribute tempAttr(ATTRIBUTE_VALUE_OF_CONSTANT);
+            tempAttr.set_value_of_constant(*(m->type));
+            SymbolEntry tmpEntry(
+                m->variable_name, 
+                this->specify_kind, 
+                this->level, 
+                *(m->type), 
+                tempAttr,
+                VARIABLE_NODE
+            );
+            tmpEntry.variable_node = m;
+            this->current_scope->put(tmpEntry);
+        }
+    } else {
+        if(m->constant_value_node == nullptr){ // Not Constant
+            SymbolEntry tmpEntry(
+                m->variable_name, 
+                KIND_VARIABLE, 
+                this->level, 
+                *(m->type), 
+                Attribute(NO_ATTRIBUTE),
+                VARIABLE_NODE
+            );
+            tmpEntry.variable_node = m;
+            this->current_scope->put(tmpEntry);
+        }
+        else {
+            Attribute tempAttr(ATTRIBUTE_VALUE_OF_CONSTANT);
+            tempAttr.set_value_of_constant(*(m->type));
+            SymbolEntry tmpEntry(
+                m->variable_name, 
+                KIND_CONSTANT,
+                this->level, 
+                *(m->type), 
+                tempAttr,
+                VARIABLE_NODE
+            );
+            tmpEntry.variable_node = m;
+            this->current_scope->put(tmpEntry);
+        }
     }
 
     // Semantic Check
@@ -203,8 +224,6 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         this->semantic_error = 1;
         this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->function_name);
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-
-        return; // No need further check
     } else {
         // Push Name into global scope
         Attribute tempAttr(ATTRIBUTE_PARAMETERS);
@@ -259,7 +278,8 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
 
 void SemanticAnalyzer::visit(CompoundStatementNode *m) { //STATEMENT
     // Push Scope
-    if(this->src_node.top() != FUNCTION_NODE) {
+    if( this->src_node.top() != FUNCTION_NODE) 
+    {
         this->level_up();
         SymbolTable* new_scope = new SymbolTable(this->level);
         this->push(new_scope);
@@ -279,7 +299,8 @@ void SemanticAnalyzer::visit(CompoundStatementNode *m) { //STATEMENT
     this->pop_src_node();
     
     // Pop Scope
-    if(this->src_node.top() != FUNCTION_NODE) {
+    if( this->src_node.top() != FUNCTION_NODE) 
+    {
         this->pop();
         this->level_down();
     }
@@ -326,7 +347,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
         m_error = true;
     }
 
-    if(m->expression_node_list != nullptr){
+    if(m->expression_node_list != nullptr && m_error == false){
     // Part1: 
         // First visit expression list
         this->push_src_node(VARIABLE_REFERENCE_NODE);
@@ -340,10 +361,16 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
             VariableInfo temp = this->expression_stack.top();
             expression_stack.pop();
 
-            if(temp.type == UNKNOWN_TYPE) 
+            if(temp.type == UNKNOWN_TYPE && type_check !=0) 
                 type_check = 2;
-            else if(temp.type != TYPE_INTEGER)
+            else if(temp.type != TYPE_INTEGER && type_check == 0 ){
                 type_check = 1;
+                this->semantic_error = true;
+                this->error_msg+=error_found_msg(m->expression_node_list->at(i)->line_number, m->expression_node_list->at(i)->col_number);
+                this->error_msg+="index of array reference must be an integer\n";
+                this->error_msg+=src_notation_msg(this->fp,m->expression_node_list->at(i)->line_number, m->expression_node_list->at(i)->col_number);
+                m_error = true;
+            }
         }
 
         // According type_check do error response
@@ -353,11 +380,6 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
                 break;
             case 1:
                 // Error!
-                this->semantic_error = true;
-                this->error_msg+=error_found_msg(m->line_number, m->col_number);
-                this->error_msg+="index of array reference must be an integer\n";
-                this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-                m_error = true;
                 break; 
             case 2:
                 // Expression Node has Problem
@@ -584,7 +606,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) { //EXPRESSION
                 if(error == true){
                     this->semantic_error = true;
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
-                    this->error_msg+="invalid operands to unary operation";
+                    this->error_msg+="invalid operand to unary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
                     this->error_msg+="('"+info_convert(lhs)+"')\n";
                     this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
@@ -632,15 +654,92 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) { //EXPRESSION
 }
 
 void SemanticAnalyzer::visit(IfNode *m) { //STATEMENT
+    // Visit Child Nodes
+    this->push_src_node(IF_NODE);
+        if (m->condition != nullptr)
+            m->condition->accept(*this);
 
+        if (m->body != nullptr)
+            for(uint i=0; i< m->body->size(); i++)
+                (*(m->body))[i]->accept(*this);
+        
+        if (m->body_of_else != nullptr)
+            for(uint i=0; i< m->body_of_else->size(); i++)
+                (*(m->body_of_else))[i]->accept(*this);
+    this->pop_src_node();
+
+    // Semantic Check
+    VariableInfo tmpInfo = this->expression_stack.top();
+    this->expression_stack.pop();
+
+    if(tmpInfo.type != TYPE_BOOLEAN){
+        if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
+        this->semantic_error = true;
+        this->error_msg+=error_found_msg(m->condition->line_number, m->condition->col_number);
+        this->error_msg+="the expression of condition must be boolean type\n";
+        this->error_msg+=src_notation_msg(this->fp, m->condition->line_number, m->condition->col_number);
+    }
 }
 
 void SemanticAnalyzer::visit(WhileNode *m) { //STATEMENT
+    // Visit Child Nodes
+    this->push_src_node(WHILE_NODE);
+        if (m->condition != nullptr)
+            m->condition->accept(*this);
 
+        if (m->body != nullptr)
+            for(uint i=0; i< m->body->size(); i++)
+                (*(m->body))[i]->accept(*this);
+    this->pop_src_node();
+
+    // Semantic Check
+    VariableInfo tmpInfo = this->expression_stack.top();
+    this->expression_stack.pop();
+
+    if(tmpInfo.type != TYPE_BOOLEAN){
+        if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
+        this->semantic_error = true;
+        this->error_msg+=error_found_msg(m->condition->line_number, m->condition->col_number);
+        this->error_msg+="the expression of condition must be boolean type\n";
+        this->error_msg+=src_notation_msg(this->fp, m->condition->line_number, m->condition->col_number);
+    }
 }
 
 void SemanticAnalyzer::visit(ForNode *m) { //STATEMENT
+    // Push Scope
+    this->level_up();
+    SymbolTable* new_scope = new SymbolTable(this->level);
+    this->push(new_scope);
 
+    // Visit Child Node
+    this->push_src_node(FOR_NODE);
+        this->specify_on(KIND_LOOP_VAR);
+        if (m->loop_variable_declaration != nullptr)
+            m->loop_variable_declaration->accept(*this);
+        this->specify_off();
+        
+        if (m->initial_statement != nullptr)
+            m->initial_statement->accept(*this);
+
+        if (m->condition != nullptr)
+            m->condition->accept(*this);
+
+        if (m->body != nullptr)
+            for(uint i=0; i< m->body->size(); i++)
+                (*(m->body))[i]->accept(*this);
+    this->pop_src_node();
+
+    // Semantic Check
+    if(m->lower_bound > m->upper_bound){
+        this->semantic_error = true;
+        this->error_msg+=error_found_msg(m->line_number, m->col_number);
+        this->error_msg+="the lower bound of iteration count must be smaller than or equal to the upper bound\n";
+        this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+    }
+
+    // Pop Scope
+    this->pop();
+    this->level_down();
 }
 
 void SemanticAnalyzer::visit(ReturnNode *m) { //STATEMENT
