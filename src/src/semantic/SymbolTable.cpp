@@ -40,10 +40,10 @@ SymbolEntry::SymbolEntry(
         this->is_used = true;
     }
 
-SymbolTable::SymbolTable(){
+SymbolTable::SymbolTable(unsigned int _level){
     this->prev_scope = NULL;
     this->next_scope_list.clear();
-    this->level = 0;
+    this->level = _level;
     this->entry.clear();
     this->entry_name.clear();
 }

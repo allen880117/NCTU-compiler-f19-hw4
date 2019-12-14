@@ -285,8 +285,6 @@ FunctionDeclaration:
         // Disassemble FormalArgList (node w type list ptr list ptr)
         if ($3!=nullptr)
             for(uint i=0; i<$3->size(); i++){
-                // put node (Node)
-                //parameters->push_back((*$3)[i]->node);
                 for(uint j=0; j<(*$3)[i]->counter; j++){
                     // put type (VariableInfo*)
                     // duplicate (eliminate hierarchy problem)
@@ -1175,7 +1173,7 @@ int main(int argc, const char *argv[]) {
     SemanticAnalyzer visitor(string(argv[1]), fp, OptDum);
     AST->accept(visitor);
 
-    if(visitor.semantic_error == 0)
+    if(visitor.is_semantic_error() == 0)
     printf("\n"
            "|---------------------------------------------|\n"
            "|  There is no syntactic and semantic error!  |\n"

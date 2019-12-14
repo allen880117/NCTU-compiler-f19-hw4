@@ -68,7 +68,7 @@ class SymbolTable{
         vector<string>           entry_name;
 
     public:
-        SymbolTable();
+        SymbolTable(unsigned int _level);
         ~SymbolTable();
 
         void put(SymbolEntry _symbol_entry);
