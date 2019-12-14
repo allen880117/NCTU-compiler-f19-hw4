@@ -324,9 +324,9 @@ void SemanticAnalyzer::visit(PrintNode *m) { //STATEMENT
     if(tmpInfo.type_set != SET_SCALAR){
         if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
         this->semantic_error = true;
-        this->error_msg+=error_found_msg(m->line_number, m->col_number);
+        this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
         this->error_msg+="variable reference of print statement must be scalar type\n";
-        this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+        this->error_msg+=src_notation_msg(this->fp, m->expression_node->line_number, m->expression_node->col_number);
     }
 }
 
