@@ -8,6 +8,11 @@ using namespace std;
 // TODO: Dump Function
 //
 
+string name_cut(string _name){
+    if(_name.length()>32) return _name.substr(0, 32);
+    else return _name;
+}
+
 // true -> two type are same
 bool array_size_check(VariableInfo lhs, VariableInfo rhs){
     if(lhs.type_set == rhs.type_set){
@@ -71,6 +76,7 @@ string info_convert(VariableInfo input){
                 case TYPE_REAL:    msg = "real";    break;
                 case TYPE_STRING:  msg = "string";  break;
                 case TYPE_BOOLEAN: msg = "boolean"; break;
+                case TYPE_VOID:    msg = "void";    break;
                 default:           msg = "unknown"; break;
             }
             break;
@@ -80,6 +86,7 @@ string info_convert(VariableInfo input){
                 case TYPE_REAL:    msg = "real";    break;
                 case TYPE_STRING:  msg = "string";  break;
                 case TYPE_BOOLEAN: msg = "boolean"; break;
+                case TYPE_VOID:    msg = "void";    break;
                 default:           msg = "unknown"; break;
             }
             msg += " ";

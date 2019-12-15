@@ -116,7 +116,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
             this->semantic_error = 1;
             this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
             this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-            this->push_error_stack(false);
+            
             return;
         }
     }
@@ -127,7 +127,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         this->semantic_error = 1;
         this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-        this->push_error_stack(false);
+        
         return;
     } 
 
@@ -137,7 +137,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         this->semantic_error = 1;
         this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-        this->push_error_stack(false);
+        
         return;
     } 
 
@@ -215,16 +215,14 @@ void SemanticAnalyzer::visit(VariableNode *m) {
             this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
 
             this->current_scope->entry[m->variable_name].is_error = true;
-            this->push_error_stack(false);
+            
         }
-    } else {
-        this->push_error_stack(true);
-    }
+    } 
 }
 
 void SemanticAnalyzer::visit(ConstantValueNode *m) { //EXPRESSION
     this->expression_stack.push(*(m->constant_value));
-    this->push_error_stack(true);
+    
 }
 
 void SemanticAnalyzer::visit(FunctionNode *m) { 
@@ -253,7 +251,6 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         tmpEntry.function_node = m;
         this->current_scope->put(tmpEntry);
     }
-
 // Part 2:
     // Push Scope
     this->level_up();
@@ -271,7 +268,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         
             if (m->body != nullptr)
                 m->body->accept(*this);
-    
+
     this->pop_src_node();
    
     // Semantic Check
@@ -481,7 +478,7 @@ void SemanticAnalyzer::visit(ReadNode *m) { //STATEMENT
     if(r_type.type_set != SET_SCALAR){
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->variable_reference_node->line_number, m->variable_reference_node->col_number);
-        this->error_msg+="variable reference of print statement must be scalar type\n";
+        this->error_msg+="variable reference of read statement must be scalar type\n";
         this->error_msg+=src_notation_msg(this->fp, m->variable_reference_node->line_number, m->variable_reference_node->col_number);
         return;
     }
@@ -489,6 +486,18 @@ void SemanticAnalyzer::visit(ReadNode *m) { //STATEMENT
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
     // Semantic Check
+    // Special Case
+    if(this->specify == true && this->specify_kind == KIND_LOOP_VAR){
+        // Error Happen in this node
+        VariableInfo tmpInfo;
+        tmpInfo.type_set = UNKNOWN_SET;
+        tmpInfo.type     = UNKNOWN_TYPE;
+        this->expression_stack.push(tmpInfo);
+        return ;
+    }
+
+    // Semantic Check
+    // Normal Case
     bool exist = true;
     bool m_error = false;
     if(check_symbol_inside(m->variable_name) == false){
@@ -506,13 +515,14 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
     // Part1: 
         // First visit expression list
         this->push_src_node(VARIABLE_REFERENCE_NODE);
-            for(uint i=0; i< m->expression_node_list->size(); i++)
+            if (m->expression_node_list != nullptr)
+                for(int i=m->expression_node_list->size()-1; i>=0 ; i--) // REVERSE TRAVERSE
                     (*(m->expression_node_list))[i]->accept(*this);
         this->pop_src_node();
 
         // Check the expression stack
         int type_check = 0;
-        for(int i=m->expression_node_list->size(); i>=0; i--){
+        for(uint i=0; i<m->expression_node_list->size(); i++){
             VariableInfo temp = this->expression_stack.top();
             expression_stack.pop();
 
@@ -551,7 +561,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
         tmpInfo.type = UNKNOWN_TYPE;
 
         this->expression_stack.push(tmpInfo);
-        this->push_error_stack(false);
+        
     } else {
         if(m->expression_node_list != nullptr){
             VariableInfo EntryInfo = *this->get_symbol_entry(m->variable_name).variable_node->type;
@@ -563,21 +573,21 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
             if(dimension == 0){
                 tmpInfo.type_set = SET_SCALAR;
             } else {
-                for(uint i=0; i<dimension; i++)
+                for(uint i=m->expression_node_list->size(); i<EntryInfo.array_range.size(); i++)
                     tmpInfo.array_range.push_back(EntryInfo.array_range[i]);
             }
         
             this->expression_stack.push(tmpInfo);
-            this->push_error_stack(true);
+            
         } else {
             VariableInfo tmpInfo = *this->get_symbol_entry(m->variable_name).variable_node->type;
             this->expression_stack.push(tmpInfo);     
-            this->push_error_stack(true);
+            
         }
     }
 }
 
-void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
+void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION    
     // Visit Child Node
     this->push_src_node(BINARY_OPERATOR_NODE);
         if (m->left_operand != nullptr)
@@ -863,10 +873,12 @@ void SemanticAnalyzer::visit(ForNode *m) { //STATEMENT
         if (m->loop_variable_declaration != nullptr)
             m->loop_variable_declaration->accept(*this);
         this->specify_off();
-        
+
+        this->specify_on(KIND_LOOP_VAR);
         if (m->initial_statement != nullptr)
             m->initial_statement->accept(*this);
-
+        this->specify_off();
+        
         if (m->condition != nullptr)
             m->condition->accept(*this);
 
@@ -912,12 +924,12 @@ void SemanticAnalyzer::visit(ReturnNode *m) { //STATEMENT
         return;
     }
 
-    VariableInfo tmpInfo = get_function_return_type();
-    if( tmpInfo.type != r_type.type ||
-        tmpInfo.type_set != r_type.type_set ){
+    VariableInfo returnTypeInfo = get_function_return_type();
+    if( (r_type.type_set == SET_ACCUMLATED) ||
+        (r_type.type != returnTypeInfo.type) ){
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->return_value->line_number, m->return_value->col_number);
-        this->error_msg+="return '"+type_convert(r_type.type)+"' from a function with return type 'real'\n";
+        this->error_msg+="return '"+info_convert(r_type)+"' from a function with return type '"+info_convert(returnTypeInfo)+"'\n";
         this->error_msg+=src_notation_msg(this->fp, m->return_value->line_number, m->return_value->col_number);
         return;
     }
@@ -925,5 +937,83 @@ void SemanticAnalyzer::visit(ReturnNode *m) { //STATEMENT
 }
 
 void SemanticAnalyzer::visit(FunctionCallNode *m) { //EXPRESSION //STATEMENT
+    // Visit Child Node
+    this->push_src_node(FUNCTION_CALL_NODE);
+        if (m->arguments != nullptr)
+            for(int i=m->arguments->size()-1; i>=0; i--) // REVERSE TRAVERSE
+                (*(m->arguments))[i]->accept(*this);
+    this->pop_src_node();
 
+    // Semantic Check
+    bool error_found = false;
+    if(check_function_declaration(m->function_name) == false){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->line_number, m->col_number);
+        this->error_msg+="used of undeclared function '"+name_cut(m->function_name)+"'\n";
+        this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+        error_found = true;
+        return;
+    }
+
+    SymbolEntry tmpEntry = this->symbol_table_root->next_scope_list[0]->entry[m->function_name];
+    unsigned int arguments_size;
+    if(m->arguments != nullptr) arguments_size = m->arguments->size();
+    else                        arguments_size = 0;
+    if(error_found==false){
+        if(arguments_size != tmpEntry.function_node->prototype.size()){       
+            this->semantic_error = 1;
+            this->error_msg+=error_found_msg(m->line_number, m->col_number);
+            this->error_msg+="too few/much arguments to function invocation\n";
+            this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+            error_found = true;
+            return;
+        }
+    }    
+
+    if(error_found==false){ // We can ensure two para-list-size is same here
+        for(uint i=0; i<tmpEntry.function_node->prototype.size(); i++){
+            VariableInfo tmpInfo = this->expression_stack.top();
+            this->expression_stack.pop();
+
+            if(error_found == false){
+                switch(tmpInfo.type_set){
+                    case SET_ACCUMLATED:
+                        if(array_size_check(tmpInfo, *(tmpEntry.function_node->prototype[i])) == false){
+                            this->semantic_error = 1;
+                            this->error_msg+=error_found_msg(m->arguments->at(i)->line_number,m->arguments->at(i)->col_number);
+                            this->error_msg+="incompatible types passing '"+info_convert(tmpInfo);
+                            this->error_msg+="' to parameter of type '"+info_convert(*(tmpEntry.function_node->prototype[i]))+"'\n";
+                            error_found = true;
+                        }
+                        break;
+                    case SET_SCALAR:
+                    case SET_CONSTANT_LITERAL:
+                        if(tmpInfo.type != tmpEntry.function_node->prototype[i]->type){
+                            this->semantic_error = 1;
+                            this->error_msg+=error_found_msg(m->arguments->at(i)->line_number,m->arguments->at(i)->col_number);
+                            this->error_msg+="incompatible types passing '"+info_convert(tmpInfo);
+                            this->error_msg+="' to parameter of type '"+info_convert(*(tmpEntry.function_node->prototype[i]))+"'\n";
+                            error_found = true;
+                        }
+                        break;
+                    case UNKNOWN_SET:
+                    default:
+                        error_found = true;
+                        break;
+                }
+            }       
+        }
+    }
+
+    // Push Expression Stack
+    if(error_found == false){
+        VariableInfo tmpInfo;
+        tmpInfo = *(tmpEntry.function_node->return_type);
+        this->expression_stack.push(tmpInfo);
+    } else {
+        VariableInfo tmpInfo;
+        tmpInfo.type_set = UNKNOWN_SET;
+        tmpInfo.type     = UNKNOWN_TYPE;
+        this->expression_stack.push(tmpInfo);
+    }
 }

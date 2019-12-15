@@ -13,7 +13,9 @@
 13:     return 10;
 14: end
 15: end ret
-
-|---------------------------------------------|
-|  There is no syntactic and semantic error!  |
-|---------------------------------------------|
+<Error> Found in line 8, column 12: return 'boolean [99]' from a function with return type 'boolean'
+        return bool[1];
+               ^
+<Error> Found in line 13, column 5: program/procedure should not return a value
+        return 10;
+        ^

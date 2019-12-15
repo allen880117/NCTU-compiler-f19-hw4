@@ -64,12 +64,10 @@ void SemanticAnalyzer::dump_symbol_table(){
 
 void SemanticAnalyzer::push(SymbolTable* _new_scope, Node m, enum NODE_TABLE type,VariableInfo re_type){
     _new_scope->prev_scope = this->current_scope;
-    _new_scope->prev_scope_node = m;
-    _new_scope->prev_node_type = type;
-    _new_scope->prev_return_type = re_type;
+    _new_scope->in_node = m;
+    _new_scope->in_node_type = type;
+    _new_scope->in_node_return_type = re_type;
     this->current_scope->next_scope_list.push_back(_new_scope);
-    this->current_scope->next_scope_node_list.push_back(m);
-    this->current_scope->next_node_type_list.push_back(type);
 
     this->current_scope = _new_scope;
 }
@@ -179,8 +177,9 @@ bool SemanticAnalyzer::check_program_or_procedure_call(){
     bool is_error = false;
     SymbolTable* current = this->current_scope;
     while(true){
-        if(current->level == 1 && current->prev_scope->level == 0){
-            if(current->prev_return_type.type == TYPE_VOID){
+        if( current->in_node_type == FUNCTION_NODE ||
+            current->in_node_type == PROGRAM_NODE ){
+            if(current->in_node_return_type.type == TYPE_VOID){
                 return true;
             }   
             break;
@@ -193,19 +192,19 @@ bool SemanticAnalyzer::check_program_or_procedure_call(){
 VariableInfo SemanticAnalyzer::get_function_return_type(){
     SymbolTable* current = this->current_scope;
     while(true){
-        if(current->level == 1 && current->prev_scope->level == 0){
-            return current->prev_return_type;
+        if(current->in_node_type == FUNCTION_NODE){
+            return current->in_node_return_type;
         }
         else current = current->prev_scope;
     }
 }
 
-void SemanticAnalyzer::push_error_stack(bool tof){
-    this->error_stack.push(tof);
-}
-
-bool SemanticAnalyzer::get_pop_error_stack(){
-    bool tmp = this->error_stack.top();
-    this->error_stack.pop();
-    return tmp;
+bool SemanticAnalyzer::check_function_declaration(string _name){
+    if(_name.length() > 32) _name = _name.substr(0, 32);
+    SymbolTable* global_scope = this->symbol_table_root->next_scope_list[0];
+    if(global_scope->entry[_name].is_used == true){
+        return true;
+    } else {
+        return false;
+    }
 }

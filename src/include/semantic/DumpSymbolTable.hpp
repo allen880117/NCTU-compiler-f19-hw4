@@ -5,6 +5,7 @@
 //
 // TODO: Dump Function
 //
+string name_cut(string _name);
 bool array_size_check(VariableInfo lhs, VariableInfo rhs);
 bool fault_type_check(VariableInfo input);
 string info_convert(VariableInfo input);

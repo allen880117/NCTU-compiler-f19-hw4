@@ -50,32 +50,39 @@ class SemanticAnalyzer : public ASTVisitorBase
         string error_msg;
         int    semantic_error;
 
+        // Level Manange
         void  level_up();
         void  level_down();
+
+        // Scope Manage
         void  push(SymbolTable* _new_scope, Node m, enum NODE_TABLE type, VariableInfo re_type);
         void  pop();
 
+        // Kind Specify
         bool      specify;
         FieldKind specify_kind;
         void  specify_on(FieldKind);
         void  specify_off();
 
+        // Source Node
         stack<enum  NODE_TABLE>  src_node;
         void  push_src_node(enum NODE_TABLE);
         void  pop_src_node();
 
+        // Expression Stack
+        stack<VariableInfo> expression_stack;
+
+        // Dump Symbol Table
         void  dump_symbol_table_util(SymbolTable* enter);
 
-        bool  check_symbol_inside(string _name);
+        // Other Utils
+        bool        check_symbol_inside(string _name);
         SymbolEntry get_symbol_entry(string _name);
-
-        stack<VariableInfo> expression_stack;
-        stack<bool> error_stack;
-        void  push_error_stack(bool tof);
-        bool  get_pop_error_stack();
 
         bool  check_loop_var(string _name);
         bool  check_array_declaration_error(string _name);
         bool  check_program_or_procedure_call();
+        bool  check_function_declaration(string _name);
+
         VariableInfo get_function_return_type();
 };
