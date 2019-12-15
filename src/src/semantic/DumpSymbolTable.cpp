@@ -8,6 +8,7 @@ using namespace std;
 // TODO: Dump Function
 //
 
+// true -> two type are same
 bool array_size_check(VariableInfo lhs, VariableInfo rhs){
     if(lhs.type_set == rhs.type_set){
         if(lhs.type == rhs.type){
@@ -95,6 +96,19 @@ string info_convert(VariableInfo input){
             }
             break;
         default: msg = "unknown"; break;
+    }
+    return msg;
+}
+
+string type_convert(enum enumType type){
+    string msg = "";
+    switch(type){
+        case TYPE_INTEGER: msg = "integer"; break;
+        case TYPE_REAL:    msg = "real";    break;
+        case TYPE_STRING:  msg = "string";  break;
+        case TYPE_BOOLEAN: msg = "boolean"; break;
+        case TYPE_VOID:    msg = "void";    break;
+        default:           msg = "unknown"; break;
     }
     return msg;
 }

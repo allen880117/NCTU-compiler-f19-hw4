@@ -50,9 +50,18 @@ func1                            function   0(global)  real             string, 
 <Error> Found in line 21, column 9: symbol 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' is redeclared
         var bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbExtraCharIsUseless : string;
             ^
+<Error> Found in line 27, column 9: the value of loop variable cannot be modified inside the loop
+        for i := 1 to 10 do
+            ^
 <Error> Found in line 29, column 13: symbol 'i' is redeclared
             var i : integer;    // error redeclare
                 ^
 <Error> Found in line 30, column 13: symbol 'i' is redeclared
             for i := 2 to 3 do  // error same iterator
                 ^
+<Error> Found in line 30, column 13: the value of loop variable cannot be modified inside the loop
+            for i := 2 to 3 do  // error same iterator
+                ^
+<Error> Found in line 31, column 18: assigning to 'integer' from incompatible type 'integer'
+                a := 3;
+                     ^

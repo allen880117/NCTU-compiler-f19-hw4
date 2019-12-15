@@ -62,9 +62,15 @@ void SemanticAnalyzer::dump_symbol_table(){
     this->dump_symbol_table_util(this->symbol_table_root->next_scope_list[0]);
 }
 
-void SemanticAnalyzer::push(SymbolTable* _new_scope){
+void SemanticAnalyzer::push(SymbolTable* _new_scope, Node m, enum NODE_TABLE type,VariableInfo re_type){
     _new_scope->prev_scope = this->current_scope;
+    _new_scope->prev_scope_node = m;
+    _new_scope->prev_node_type = type;
+    _new_scope->prev_return_type = re_type;
     this->current_scope->next_scope_list.push_back(_new_scope);
+    this->current_scope->next_scope_node_list.push_back(m);
+    this->current_scope->next_node_type_list.push_back(type);
+
     this->current_scope = _new_scope;
 }
 void SemanticAnalyzer::pop(){
@@ -148,4 +154,58 @@ bool SemanticAnalyzer::check_loop_var(string _name){
         }
     }
     return found;
+}
+
+// true -> error array declaration
+bool SemanticAnalyzer::check_array_declaration_error(string _name){
+    if(_name.length() > 32) _name = _name.substr(0,32);
+    bool is_error = false;
+    SymbolTable* current = this->current_scope;
+    while(true){
+        if( current->entry[_name].is_used == true )
+        {
+            is_error = current->entry[_name].is_error;
+            break;
+        } else {
+            if(current->level == 0) break;
+            else current = current->prev_scope;
+        }
+    }
+    return is_error;
+}
+
+// true -> inside program / procedure call
+bool SemanticAnalyzer::check_program_or_procedure_call(){
+    bool is_error = false;
+    SymbolTable* current = this->current_scope;
+    while(true){
+        if(current->level == 1 && current->prev_scope->level == 0){
+            if(current->prev_return_type.type == TYPE_VOID){
+                return true;
+            }   
+            break;
+        }
+        else current = current->prev_scope;
+    }
+    return is_error;
+}
+
+VariableInfo SemanticAnalyzer::get_function_return_type(){
+    SymbolTable* current = this->current_scope;
+    while(true){
+        if(current->level == 1 && current->prev_scope->level == 0){
+            return current->prev_return_type;
+        }
+        else current = current->prev_scope;
+    }
+}
+
+void SemanticAnalyzer::push_error_stack(bool tof){
+    this->error_stack.push(tof);
+}
+
+bool SemanticAnalyzer::get_pop_error_stack(){
+    bool tmp = this->error_stack.top();
+    this->error_stack.pop();
+    return tmp;
 }

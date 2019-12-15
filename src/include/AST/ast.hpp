@@ -96,6 +96,7 @@ class ASTNodeBase
     public:
         int line_number;
         int col_number;
+        string name;
 
     public:
         virtual void accept(class ASTVisitorBase &v) = 0;

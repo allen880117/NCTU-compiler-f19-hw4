@@ -32,7 +32,10 @@ using namespace std;
 void SemanticAnalyzer::visit(ProgramNode *m) {
     // Put Symbol Table (Special Case)
     SymbolTable* new_scope = new SymbolTable(0);
-    this->push(new_scope);
+    VariableInfo tmpInfo;
+    tmpInfo.type_set = UNKNOWN_SET;
+    tmpInfo.type     = TYPE_VOID;
+    this->push(new_scope, m, PROGRAM_NODE, tmpInfo);
 
     // Push Symbol Entity
     if(this->current_scope->redeclare_check(m->program_name) == false ){
@@ -40,7 +43,6 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
         this->semantic_error = 1;
         this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->program_name);
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-        
     } else {
         VariableInfo tmpInfo;
         tmpInfo.type_set = UNKNOWN_SET;
@@ -114,6 +116,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
             this->semantic_error = 1;
             this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
             this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+            this->push_error_stack(false);
             return;
         }
     }
@@ -124,6 +127,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         this->semantic_error = 1;
         this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+        this->push_error_stack(false);
         return;
     } 
 
@@ -133,6 +137,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         this->semantic_error = 1;
         this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+        this->push_error_stack(false);
         return;
     } 
 
@@ -203,17 +208,23 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         }
 
         if(is_upperbound_le_lowerbound == true){
-            this->semantic_error = true;
+            this->semantic_error = 1;
             this->error_msg+=error_found_msg(m->line_number, m->col_number);
             this->error_msg+="'"+m->variable_name+"'";
             this->error_msg+=" declared as an array with a lower bound greater or equal to upper bound\n";
             this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+
+            this->current_scope->entry[m->variable_name].is_error = true;
+            this->push_error_stack(false);
         }
+    } else {
+        this->push_error_stack(true);
     }
 }
 
 void SemanticAnalyzer::visit(ConstantValueNode *m) { //EXPRESSION
     this->expression_stack.push(*(m->constant_value));
+    this->push_error_stack(true);
 }
 
 void SemanticAnalyzer::visit(FunctionNode *m) { 
@@ -247,7 +258,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
     // Push Scope
     this->level_up();
     SymbolTable* new_scope = new SymbolTable(this->level);
-    this->push(new_scope);
+    this->push(new_scope, m, FUNCTION_NODE, *(m->return_type));
 
     // Visit Child Node
     this->push_src_node(FUNCTION_NODE);
@@ -282,7 +293,10 @@ void SemanticAnalyzer::visit(CompoundStatementNode *m) { //STATEMENT
     {
         this->level_up();
         SymbolTable* new_scope = new SymbolTable(this->level);
-        this->push(new_scope);
+        VariableInfo tmpInfo;
+        tmpInfo.type_set = UNKNOWN_SET;
+        tmpInfo.type     = UNKNOWN_TYPE;
+        this->push(new_scope, m, COMPOUND_STATEMENT_NODE,tmpInfo);
     }
 
     // Visit Child Nodes
@@ -307,11 +321,113 @@ void SemanticAnalyzer::visit(CompoundStatementNode *m) { //STATEMENT
 }
 
 void SemanticAnalyzer::visit(AssignmentNode *m) { //STATEMENT
-    
+    // Visit Child Node
+    this->push_src_node(ASSIGNMENT_NODE);
+        if (m->variable_reference_node != nullptr)
+            m->variable_reference_node->accept(*this);
+        
+        if (m->expression_node != nullptr)
+            m->expression_node->accept(*this);
+    this->pop_src_node();
+
+    // Semantic Check
+    VariableInfo r_type = this->expression_stack.top();
+    this->expression_stack.pop();
+    VariableInfo l_type = this->expression_stack.top();
+    this->expression_stack.pop();
+
+    if(r_type.type == UNKNOWN_TYPE || l_type.type == UNKNOWN_TYPE){
+        // No Need Further Check
+        return;
+    }
+
+    if(l_type.type_set == SET_CONSTANT_LITERAL){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        this->error_msg+="cannot assign to variable '"+m->variable_reference_node->name+"' which is a constant\n";
+        this->error_msg+=src_notation_msg(this->fp,m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        return;
+    }
+
+    if(check_loop_var(m->variable_reference_node->name) == true){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        this->error_msg+="the value of loop variable cannot be modified inside the loop\n";
+        this->error_msg+=src_notation_msg(this->fp,m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        return;
+    }
+
+    if(l_type.type_set == SET_ACCUMLATED && r_type.type_set != SET_ACCUMLATED){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        this->error_msg+="array assignment is not allowed\n";
+        this->error_msg+=src_notation_msg(this->fp,m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        return;
+    } else if(l_type.type_set != SET_ACCUMLATED && r_type.type_set == SET_ACCUMLATED){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
+        this->error_msg+="array assignment is not allowed\n";
+        this->error_msg+=src_notation_msg(this->fp,m->expression_node->line_number, m->expression_node->col_number);
+        return;
+    }
+
+    if( l_type.type_set == SET_SCALAR && 
+        l_type.type == TYPE_INTEGER && 
+        ((r_type.type_set != SET_SCALAR && r_type.type_set != SET_CONSTANT_LITERAL) ||
+        (r_type.type != TYPE_INTEGER && r_type.type != TYPE_REAL )))
+    {
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
+        this->error_msg+="assigning to '"+info_convert(l_type);
+        this->error_msg+="' from incompatible type '"+info_convert(r_type)+"'\n";
+        this->error_msg+=src_notation_msg(this->fp,m->expression_node->line_number, m->expression_node->col_number);
+    }
+    else if(l_type.type_set == SET_SCALAR && 
+            l_type.type == TYPE_REAL && 
+        ((r_type.type_set != SET_SCALAR && r_type.type_set != SET_CONSTANT_LITERAL) ||
+        (r_type.type != TYPE_REAL )))
+    {   
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
+        this->error_msg+="assigning to '"+info_convert(l_type);
+        this->error_msg+="' from incompatible type '"+info_convert(r_type)+"'\n";
+        this->error_msg+=src_notation_msg(this->fp,m->expression_node->line_number, m->expression_node->col_number);
+    } 
+    else if(l_type.type_set == SET_SCALAR &&
+            l_type.type == TYPE_BOOLEAN &&
+        ((r_type.type_set != SET_SCALAR && r_type.type_set != SET_CONSTANT_LITERAL) ||
+        (r_type.type != TYPE_BOOLEAN )))
+    {
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
+        this->error_msg+="assigning to '"+info_convert(l_type);
+        this->error_msg+="' from incompatible type '"+info_convert(r_type)+"'\n";
+        this->error_msg+=src_notation_msg(this->fp,m->expression_node->line_number, m->expression_node->col_number);
+    }
+    else if(l_type.type_set == SET_SCALAR &&
+            l_type.type == TYPE_STRING &&
+        ((r_type.type_set != SET_SCALAR && r_type.type_set != SET_CONSTANT_LITERAL) ||
+        (r_type.type != TYPE_STRING )))
+    {
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
+        this->error_msg+="assigning to '"+info_convert(l_type);
+        this->error_msg+="' from incompatible type '"+info_convert(r_type)+"'\n";
+        this->error_msg+=src_notation_msg(this->fp,m->expression_node->line_number, m->expression_node->col_number);
+    }
+    else if(l_type.type_set == SET_ACCUMLATED && r_type.type_set == SET_ACCUMLATED){
+        if(array_size_check(l_type, r_type) == false ){
+            this->semantic_error = 1;
+            this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
+            this->error_msg+="assigning to '"+info_convert(l_type);
+            this->error_msg+="' from incompatible type '"+info_convert(r_type)+"'\n";
+            this->error_msg+=src_notation_msg(this->fp,m->expression_node->line_number, m->expression_node->col_number);
+        }
+    }
 }
 
 void SemanticAnalyzer::visit(PrintNode *m) { //STATEMENT
-    //  Visit Child Node
+    // Visit Child Node
     this->push_src_node(PRINT_NODE);
         if (m->expression_node != nullptr)
             m->expression_node->accept(*this);
@@ -323,7 +439,7 @@ void SemanticAnalyzer::visit(PrintNode *m) { //STATEMENT
 
     if(tmpInfo.type_set != SET_SCALAR){
         if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
-        this->semantic_error = true;
+        this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
         this->error_msg+="variable reference of print statement must be scalar type\n";
         this->error_msg+=src_notation_msg(this->fp, m->expression_node->line_number, m->expression_node->col_number);
@@ -331,7 +447,44 @@ void SemanticAnalyzer::visit(PrintNode *m) { //STATEMENT
 }
 
 void SemanticAnalyzer::visit(ReadNode *m) { //STATEMENT
+    // Visit Child Node
+    this->push_src_node(READ_NODE);
+        if (m->variable_reference_node != nullptr)
+            m->variable_reference_node->accept(*this);
+    this->pop_src_node();
 
+    // Semantic Check
+    VariableInfo r_type = this->expression_stack.top();
+    this->expression_stack.pop();
+
+    if(r_type.type == UNKNOWN_TYPE && r_type.type_set == UNKNOWN_SET){
+        // No Need Further Check
+        return;
+    }
+
+    if(r_type.type_set == SET_CONSTANT_LITERAL){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        this->error_msg+="variable reference of read statement cannot be a constant variable reference\n";
+        this->error_msg+=src_notation_msg(this->fp, m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        return;
+    }
+
+    if(check_loop_var(m->variable_reference_node->name) == true){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        this->error_msg+="the value of loop variable cannot be modified inside the loop\n";
+        this->error_msg+=src_notation_msg(this->fp,m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        return;
+    }
+
+    if(r_type.type_set != SET_SCALAR){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        this->error_msg+="variable reference of print statement must be scalar type\n";
+        this->error_msg+=src_notation_msg(this->fp, m->variable_reference_node->line_number, m->variable_reference_node->col_number);
+        return;
+    }
 }
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
@@ -339,11 +492,13 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
     bool exist = true;
     bool m_error = false;
     if(check_symbol_inside(m->variable_name) == false){
-        this->semantic_error = true;
+        this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->line_number, m->col_number);
         this->error_msg+="use of undeclared identifier '"+m->variable_name+"'\n";
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
         exist = false;
+        m_error = true;
+    } else if(check_array_declaration_error(m->variable_name) == true){
         m_error = true;
     }
 
@@ -357,7 +512,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
 
         // Check the expression stack
         int type_check = 0;
-        for(uint i=0; i< m->expression_node_list->size(); i++){
+        for(int i=m->expression_node_list->size(); i>=0; i--){
             VariableInfo temp = this->expression_stack.top();
             expression_stack.pop();
 
@@ -365,27 +520,12 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
                 type_check = 2;
             else if(temp.type != TYPE_INTEGER && type_check == 0 ){
                 type_check = 1;
-                this->semantic_error = true;
+                this->semantic_error = 1;
                 this->error_msg+=error_found_msg(m->expression_node_list->at(i)->line_number, m->expression_node_list->at(i)->col_number);
                 this->error_msg+="index of array reference must be an integer\n";
                 this->error_msg+=src_notation_msg(this->fp,m->expression_node_list->at(i)->line_number, m->expression_node_list->at(i)->col_number);
                 m_error = true;
             }
-        }
-
-        // According type_check do error response
-        switch(type_check){
-            case 0:
-                // No Problem
-                break;
-            case 1:
-                // Error!
-                break; 
-            case 2:
-                // Expression Node has Problem
-                // No need to check
-            default: 
-                break;
         }
 
     // Part2:
@@ -394,7 +534,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
                 this->get_symbol_entry(m->variable_name).variable_node->type->array_range.size();
             if(m->expression_node_list->size() > subscript_size){
                 // Error!
-                this->semantic_error = true;
+                this->semantic_error = 1;
                 this->error_msg+=error_found_msg(m->line_number, m->col_number);
                 this->error_msg+="there is an over array subscript\n";
                 this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
@@ -411,6 +551,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
         tmpInfo.type = UNKNOWN_TYPE;
 
         this->expression_stack.push(tmpInfo);
+        this->push_error_stack(false);
     } else {
         if(m->expression_node_list != nullptr){
             VariableInfo EntryInfo = *this->get_symbol_entry(m->variable_name).variable_node->type;
@@ -426,10 +567,12 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
                     tmpInfo.array_range.push_back(EntryInfo.array_range[i]);
             }
         
-            this->expression_stack.push(tmpInfo);               
+            this->expression_stack.push(tmpInfo);
+            this->push_error_stack(true);
         } else {
             VariableInfo tmpInfo = *this->get_symbol_entry(m->variable_name).variable_node->type;
-            this->expression_stack.push(tmpInfo);                           
+            this->expression_stack.push(tmpInfo);     
+            this->push_error_stack(true);
         }
     }
 }
@@ -464,7 +607,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                     (rhs.type == TYPE_BOOLEAN) ) {;}
                 else { error = true; }
                 if(error == true){
-                    this->semantic_error = true;
+                    this->semantic_error = 1;
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
                     this->error_msg+="invalid operands to binary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
@@ -490,7 +633,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                 else { error = true; }
                 
                 if(error == true){
-                    this->semantic_error = true;
+                    this->semantic_error = 1;
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
                     this->error_msg+="invalid operands to binary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
@@ -536,7 +679,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                     break;
                 } else {
                     error = true;
-                    this->semantic_error = true;
+                    this->semantic_error = 1;
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
                     this->error_msg+="invalid operands to binary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
@@ -554,7 +697,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                 else { error = true; }
                 
                 if(error == true){
-                    this->semantic_error = true;
+                    this->semantic_error = 1;
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
                     this->error_msg+="invalid operands to binary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
@@ -604,7 +747,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) { //EXPRESSION
                     (lhs.type == TYPE_BOOLEAN) ) {;}
                 else { error = true; }
                 if(error == true){
-                    this->semantic_error = true;
+                    this->semantic_error = 1;
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
                     this->error_msg+="invalid operand to unary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
@@ -627,7 +770,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) { //EXPRESSION
                 }
                 else {
                     error = true; 
-                    this->semantic_error = true;
+                    this->semantic_error = 1;
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
                     this->error_msg+="invalid operands to unary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
@@ -674,7 +817,7 @@ void SemanticAnalyzer::visit(IfNode *m) { //STATEMENT
 
     if(tmpInfo.type != TYPE_BOOLEAN){
         if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
-        this->semantic_error = true;
+        this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->condition->line_number, m->condition->col_number);
         this->error_msg+="the expression of condition must be boolean type\n";
         this->error_msg+=src_notation_msg(this->fp, m->condition->line_number, m->condition->col_number);
@@ -698,7 +841,7 @@ void SemanticAnalyzer::visit(WhileNode *m) { //STATEMENT
 
     if(tmpInfo.type != TYPE_BOOLEAN){
         if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
-        this->semantic_error = true;
+        this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->condition->line_number, m->condition->col_number);
         this->error_msg+="the expression of condition must be boolean type\n";
         this->error_msg+=src_notation_msg(this->fp, m->condition->line_number, m->condition->col_number);
@@ -709,7 +852,10 @@ void SemanticAnalyzer::visit(ForNode *m) { //STATEMENT
     // Push Scope
     this->level_up();
     SymbolTable* new_scope = new SymbolTable(this->level);
-    this->push(new_scope);
+    VariableInfo tmpInfo;
+    tmpInfo.type_set = UNKNOWN_SET;
+    tmpInfo.type     = UNKNOWN_TYPE;
+    this->push(new_scope, m, FOR_NODE, tmpInfo);
 
     // Visit Child Node
     this->push_src_node(FOR_NODE);
@@ -731,7 +877,7 @@ void SemanticAnalyzer::visit(ForNode *m) { //STATEMENT
 
     // Semantic Check
     if(m->lower_bound > m->upper_bound){
-        this->semantic_error = true;
+        this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->line_number, m->col_number);
         this->error_msg+="the lower bound of iteration count must be smaller than or equal to the upper bound\n";
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
@@ -743,6 +889,38 @@ void SemanticAnalyzer::visit(ForNode *m) { //STATEMENT
 }
 
 void SemanticAnalyzer::visit(ReturnNode *m) { //STATEMENT
+    // Visit Child Node
+    this->push_src_node(RETURN_NODE);
+        if (m->return_value != nullptr)
+            m->return_value->accept(*this);
+    this->pop_src_node();
+
+    // Semantic Check Error
+    VariableInfo r_type = this->expression_stack.top();
+    this->expression_stack.pop();
+
+    if(r_type.type_set == UNKNOWN_SET && r_type.type == UNKNOWN_TYPE){
+        // No Need Further Check
+        return;
+    }
+
+    if(check_program_or_procedure_call() == true){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->line_number, m->col_number);
+        this->error_msg+="program/procedure should not return a value\n";
+        this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+        return;
+    }
+
+    VariableInfo tmpInfo = get_function_return_type();
+    if( tmpInfo.type != r_type.type ||
+        tmpInfo.type_set != r_type.type_set ){
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->return_value->line_number, m->return_value->col_number);
+        this->error_msg+="return '"+type_convert(r_type.type)+"' from a function with return type 'real'\n";
+        this->error_msg+=src_notation_msg(this->fp, m->return_value->line_number, m->return_value->col_number);
+        return;
+    }
 
 }
 

@@ -8,6 +8,7 @@
 bool array_size_check(VariableInfo lhs, VariableInfo rhs);
 bool fault_type_check(VariableInfo input);
 string info_convert(VariableInfo input);
+string type_convert(enum enumType type);
 string op_convert(enum enumOperator op);
 
 void dumpDemarcation(const char chr);

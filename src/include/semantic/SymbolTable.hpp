@@ -47,6 +47,7 @@ class SymbolEntry{
 
         // Hide Info
         bool         is_used;
+        bool         is_error; // For Array Declaration
         enum NODE_TABLE node_type;
         
         class ProgramNode* program_node;
@@ -81,8 +82,13 @@ class SymbolEntry{
 class SymbolTable{
     public:
         // Link Info
-        SymbolTable* prev_scope;
-        vector<SymbolTable*> next_scope_list;
+        SymbolTable*    prev_scope;
+        Node            prev_scope_node;
+        enum NODE_TABLE prev_node_type;
+        VariableInfo    prev_return_type;
+        vector<SymbolTable*>    next_scope_list;
+        vector<Node>            next_scope_node_list;
+        vector<enum NODE_TABLE> next_node_type_list;
         
         // General Info
         unsigned int             level;

@@ -14,6 +14,8 @@ VariableReferenceNode::VariableReferenceNode(
         this->col_number = _col_number;
         this->variable_name = _variable_name;
         this->expression_node_list = _expression_node_list;
+
+        this->name = _variable_name; // HW4 ADD // From Base Class
     }
 
 VariableReferenceNode::~VariableReferenceNode(){

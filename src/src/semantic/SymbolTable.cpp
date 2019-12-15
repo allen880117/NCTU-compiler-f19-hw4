@@ -39,6 +39,7 @@ SymbolEntry::SymbolEntry(
         this->attribute = _attribute;
 
         this->is_used = true;
+        this->is_error = false;
         this->node_type = _node_type;
     }
 

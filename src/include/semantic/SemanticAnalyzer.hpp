@@ -52,7 +52,7 @@ class SemanticAnalyzer : public ASTVisitorBase
 
         void  level_up();
         void  level_down();
-        void  push(SymbolTable* _new_scope);
+        void  push(SymbolTable* _new_scope, Node m, enum NODE_TABLE type, VariableInfo re_type);
         void  pop();
 
         bool      specify;
@@ -70,6 +70,12 @@ class SemanticAnalyzer : public ASTVisitorBase
         SymbolEntry get_symbol_entry(string _name);
 
         stack<VariableInfo> expression_stack;
+        stack<bool> error_stack;
+        void  push_error_stack(bool tof);
+        bool  get_pop_error_stack();
 
         bool  check_loop_var(string _name);
+        bool  check_array_declaration_error(string _name);
+        bool  check_program_or_procedure_call();
+        VariableInfo get_function_return_type();
 };
