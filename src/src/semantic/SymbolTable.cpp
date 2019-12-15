@@ -52,8 +52,6 @@ SymbolTable::SymbolTable(unsigned int _level){
 }
 
 SymbolTable::~SymbolTable(){
-    SAFE_DELETE(this->prev_scope)
-
     for(uint i=0; i<this->next_scope_list.size(); i++){
         SAFE_DELETE(this->next_scope_list[i])
     }

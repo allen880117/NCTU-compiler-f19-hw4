@@ -51,6 +51,10 @@ SemanticAnalyzer::SemanticAnalyzer(string _filename, FILE* _fp){
     this->specify_kind = KIND_UNKNOWN;
 }
 
+SemanticAnalyzer::~SemanticAnalyzer(){
+    delete this->symbol_table_root;
+}
+
 void SemanticAnalyzer::level_up(){this->level++;}
 void SemanticAnalyzer::level_down(){this->level--;}
 void SemanticAnalyzer::output_err_msg(){cout<<this->error_msg;}

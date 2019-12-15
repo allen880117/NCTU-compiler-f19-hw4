@@ -31,8 +31,8 @@ class SemanticAnalyzer : public ASTVisitorBase
         void visit(FunctionCallNode *m) override ;
         
         SemanticAnalyzer(string _filename, FILE* _fp);
-        ~SemanticAnalyzer(){}
-
+        ~SemanticAnalyzer();
+        
         class SymbolTable* get_symbol_table(); 
         void               dump_symbol_table();
         void               output_err_msg();
