@@ -57,7 +57,7 @@ SemanticAnalyzer::~SemanticAnalyzer(){
 
 void SemanticAnalyzer::level_up(){this->level++;}
 void SemanticAnalyzer::level_down(){this->level--;}
-void SemanticAnalyzer::output_err_msg(){cout<<this->error_msg;}
+void SemanticAnalyzer::output_err_msg(){cerr<<this->error_msg;}
 int  SemanticAnalyzer::is_semantic_error(){return this->semantic_error;}
 
 SymbolTable* SemanticAnalyzer::get_symbol_table(){return this->symbol_table_root;}
