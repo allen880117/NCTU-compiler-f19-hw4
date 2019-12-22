@@ -1,4 +1,5 @@
 #include "semantic/SymbolTable.hpp"
+#include "semantic/DumpSymbolTable.hpp"
 
 Attribute::Attribute(){
     this->attr_type = UNKNOWN_ATTRIBUTE;
@@ -6,6 +7,16 @@ Attribute::Attribute(){
 
 Attribute::Attribute(AttributeType _attr_type){
     this->attr_type = _attr_type;
+}
+
+Attribute::Attribute(vector<VariableInfo> _parameters){
+    this->parameter_type = _parameters;
+    this->attr_type = ATTRIBUTE_PARAMETERS;
+}
+
+Attribute::Attribute(VariableInfo _value){
+    this->value_of_constant = _value;
+    this->attr_type = ATTRIBUTE_VALUE_OF_CONSTANT;
 }
 
 void Attribute::set_parameter_type(vector<VariableInfo> _parameters){
@@ -29,18 +40,23 @@ SymbolEntry::SymbolEntry(
     unsigned int _level,
     VariableInfo _type,
     Attribute _attribute,
-    enum EnumNodeTable _node_type
+    enum EnumNodeTable _node_type,
+    class ProgramNode* _program_node,
+    class VariableNode* _variable_node,
+    class FunctionNode* _function_node
     ){
-        if(_name.length() > 32) this->name = _name.substr(0, 32);
-        else                    this->name = _name;
+        this->name = name_cut(_name);
         this->kind = _kind;
         this->level = _level;
         this->type = _type;
         this->attribute = _attribute;
+        this->node_type = _node_type;
+        this->program_node = _program_node;
+        this->variable_node = _variable_node;
+        this->function_node = _function_node;
 
         this->is_used = true;
         this->is_arr_decl_error = false;
-        this->node_type = _node_type;
     }
 
 SymbolTable::SymbolTable(unsigned int _level){

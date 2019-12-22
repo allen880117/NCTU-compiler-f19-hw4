@@ -41,21 +41,19 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
         this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->program_name);
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
     } else {
-        VariableInfo tmpInfo;
-        tmpInfo.type_set = UNKNOWN_SET;
-        tmpInfo.type = TYPE_VOID;
-
-        SymbolEntry tmpEntry(
-            m->program_name, 
-            KIND_PROGRAM, 
-            this->level, 
-            tmpInfo, 
-            Attribute(NO_ATTRIBUTE),
-            PROGRAM_NODE
+        this->current_scope->put(
+            SymbolEntry(
+                m->program_name, 
+                KIND_PROGRAM, 
+                this->level, 
+                VariableInfo(UNKNOWN_SET, TYPE_VOID), 
+                Attribute(NO_ATTRIBUTE),
+                PROGRAM_NODE,
+                m,
+                NULL,
+                NULL
+            )
         );
-        tmpEntry.program_node = m;
-
-        this->current_scope->put(tmpEntry);
     }
 
     // Visit Child Nodes
@@ -105,19 +103,6 @@ void SemanticAnalyzer::visit(DeclarationNode *m) {
 
 void SemanticAnalyzer::visit(VariableNode *m) {
     // Push Entry
-    // New Loop Var check Old Loop Var
-    if(this->specify == true && this->specify_kind == KIND_LOOP_VAR ){
-        if( check_loop_var(m->variable_name) == true ){
-            // Loop Var has been declared
-            // Error: Redeclare
-            this->semantic_error = 1;
-            this->error_msg+=redeclare_error_msg(m->line_number, m->col_number, m->variable_name);
-            this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-            
-            return;
-        }
-    }
-
     // New Variable check Old Loop Var
     if(check_loop_var(m->variable_name) == true ){
         // Error: Redeclare
@@ -140,57 +125,65 @@ void SemanticAnalyzer::visit(VariableNode *m) {
 
     if(this->specify == true){
         if(m->constant_value_node == nullptr){ // Not Constant
-            SymbolEntry tmpEntry(
-                m->variable_name, 
-                this->specify_kind, 
-                this->level, 
-                *(m->type), 
-                Attribute(NO_ATTRIBUTE),
-                VARIABLE_NODE
+            this->current_scope->put(
+                SymbolEntry(
+                    m->variable_name, 
+                    this->specify_kind, 
+                    this->level, 
+                    *(m->type), 
+                    Attribute(NO_ATTRIBUTE),
+                    VARIABLE_NODE,
+                    NULL,
+                    m,
+                    NULL
+                )
             );
-            tmpEntry.variable_node = m;
-            this->current_scope->put(tmpEntry);
         }
         else {
-            Attribute tempAttr(ATTRIBUTE_VALUE_OF_CONSTANT);
-            tempAttr.set_value_of_constant(*(m->type));
-            SymbolEntry tmpEntry(
-                m->variable_name, 
-                this->specify_kind, 
-                this->level, 
-                *(m->type), 
-                tempAttr,
-                VARIABLE_NODE
+            this->current_scope->put(
+                SymbolEntry(
+                    m->variable_name, 
+                    this->specify_kind, 
+                    this->level, 
+                    *(m->type), 
+                    Attribute(*(m->type)),
+                    VARIABLE_NODE,
+                    NULL,
+                    m,
+                    NULL
+                )
             );
-            tmpEntry.variable_node = m;
-            this->current_scope->put(tmpEntry);
         }
     } else {
         if(m->constant_value_node == nullptr){ // Not Constant
-            SymbolEntry tmpEntry(
-                m->variable_name, 
-                KIND_VARIABLE, 
-                this->level, 
-                *(m->type), 
-                Attribute(NO_ATTRIBUTE),
-                VARIABLE_NODE
+            this->current_scope->put(
+                SymbolEntry(
+                    m->variable_name, 
+                    KIND_VARIABLE, 
+                    this->level, 
+                    *(m->type), 
+                    Attribute(NO_ATTRIBUTE),
+                    VARIABLE_NODE,
+                    NULL,
+                    m,
+                    NULL
+                )
             );
-            tmpEntry.variable_node = m;
-            this->current_scope->put(tmpEntry);
         }
         else {
-            Attribute tempAttr(ATTRIBUTE_VALUE_OF_CONSTANT);
-            tempAttr.set_value_of_constant(*(m->type));
-            SymbolEntry tmpEntry(
-                m->variable_name, 
-                KIND_CONSTANT,
-                this->level, 
-                *(m->type), 
-                tempAttr,
-                VARIABLE_NODE
+            this->current_scope->put(
+                SymbolEntry(
+                    m->variable_name, 
+                    KIND_CONSTANT, 
+                    this->level, 
+                    *(m->type), 
+                    Attribute(*(m->type)),
+                    VARIABLE_NODE,
+                    NULL,
+                    m,
+                    NULL
+                )
             );
-            tmpEntry.variable_node = m;
-            this->current_scope->put(tmpEntry);
         }
     }
 
@@ -231,22 +224,24 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
     } else {
         // Push Name into global scope
-        Attribute tempAttr(ATTRIBUTE_PARAMETERS);
         vector<VariableInfo> tempVI;
         for(uint i=0; i<m->prototype.size(); i++){tempVI.push_back(*(m->prototype[i]));}
-        tempAttr.set_parameter_type(tempVI);
 
-        SymbolEntry tmpEntry(
-            m->function_name,
-            KIND_FUNCTION,
-            this->level,
-            *(m->return_type),
-            tempAttr,
-            FUNCTION_NODE
+        this->current_scope->put(
+            SymbolEntry(
+                m->function_name,
+                KIND_FUNCTION,
+                this->level,
+                *(m->return_type),
+                Attribute(tempVI),
+                FUNCTION_NODE,
+                NULL,
+                NULL,
+                m
+            )
         );
-        tmpEntry.function_node = m;
-        this->current_scope->put(tmpEntry);
     }
+
 // Part 2:
     // Push Scope
     this->level_up();
@@ -264,7 +259,6 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         
             if (m->body != nullptr)
                 m->body->accept(*this);
-
     this->pop_src_node();
    
     // Semantic Check
@@ -326,7 +320,8 @@ void SemanticAnalyzer::visit(AssignmentNode *m) { //STATEMENT
     VariableInfo l_type = this->expression_stack.top();
     this->expression_stack.pop();
 
-    if(r_type.type == UNKNOWN_TYPE || l_type.type == UNKNOWN_TYPE){
+    if ((r_type.type_set == UNKNOWN_SET && r_type.type == UNKNOWN_TYPE) || 
+        (l_type.type_set == UNKNOWN_SET && l_type.type == UNKNOWN_TYPE) ){
         // No Need Further Check
         return;
     }
@@ -363,8 +358,8 @@ void SemanticAnalyzer::visit(AssignmentNode *m) { //STATEMENT
 
     if( l_type.type_set == SET_SCALAR && 
         l_type.type == TYPE_INTEGER && 
-        ((r_type.type_set != SET_SCALAR && r_type.type_set != SET_CONSTANT_LITERAL) ||
-        (r_type.type != TYPE_INTEGER && r_type.type != TYPE_REAL )))
+        (((r_type.type_set == SET_SCALAR || r_type.type_set == SET_CONSTANT_LITERAL) &&
+        (r_type.type == TYPE_INTEGER || r_type.type == TYPE_REAL )) == false) )
     {
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
@@ -374,8 +369,8 @@ void SemanticAnalyzer::visit(AssignmentNode *m) { //STATEMENT
     }
     else if(l_type.type_set == SET_SCALAR && 
             l_type.type == TYPE_REAL && 
-        ((r_type.type_set != SET_SCALAR && r_type.type_set != SET_CONSTANT_LITERAL) ||
-        (r_type.type != TYPE_REAL )))
+        (((r_type.type_set == SET_SCALAR || r_type.type_set == SET_CONSTANT_LITERAL) &&
+        (r_type.type == TYPE_REAL )) == false ) )
     {   
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
@@ -385,8 +380,8 @@ void SemanticAnalyzer::visit(AssignmentNode *m) { //STATEMENT
     } 
     else if(l_type.type_set == SET_SCALAR &&
             l_type.type == TYPE_BOOLEAN &&
-        ((r_type.type_set != SET_SCALAR && r_type.type_set != SET_CONSTANT_LITERAL) ||
-        (r_type.type != TYPE_BOOLEAN )))
+        (((r_type.type_set == SET_SCALAR || r_type.type_set == SET_CONSTANT_LITERAL) &&
+        (r_type.type == TYPE_BOOLEAN )) == false) )
     {
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
@@ -396,8 +391,8 @@ void SemanticAnalyzer::visit(AssignmentNode *m) { //STATEMENT
     }
     else if(l_type.type_set == SET_SCALAR &&
             l_type.type == TYPE_STRING &&
-        ((r_type.type_set != SET_SCALAR && r_type.type_set != SET_CONSTANT_LITERAL) ||
-        (r_type.type != TYPE_STRING )))
+        (((r_type.type_set == SET_SCALAR || r_type.type_set == SET_CONSTANT_LITERAL) &&
+        (r_type.type == TYPE_STRING )) == false) )
     {
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
@@ -427,8 +422,11 @@ void SemanticAnalyzer::visit(PrintNode *m) { //STATEMENT
     VariableInfo tmpInfo = this->expression_stack.top();
     this->expression_stack.pop();
 
+    if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE){
+        return; // No Need Further Check
+    }
+
     if(tmpInfo.type_set != SET_SCALAR){
-        if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->expression_node->line_number, m->expression_node->col_number);
         this->error_msg+="variable reference of print statement must be scalar type\n";
@@ -447,9 +445,8 @@ void SemanticAnalyzer::visit(ReadNode *m) { //STATEMENT
     VariableInfo r_type = this->expression_stack.top();
     this->expression_stack.pop();
 
-    if(r_type.type == UNKNOWN_TYPE && r_type.type_set == UNKNOWN_SET){
-        // No Need Further Check
-        return;
+    if(r_type.type_set == UNKNOWN_SET && r_type.type == UNKNOWN_TYPE){
+        return; // No Need Further Check
     }
 
     if(r_type.type_set == SET_CONSTANT_LITERAL){
@@ -478,6 +475,7 @@ void SemanticAnalyzer::visit(ReadNode *m) { //STATEMENT
 }
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
+// Part 1:
     // Semantic Check
     // Special Case
     if(this->specify == true && this->specify_kind == KIND_LOOP_VAR){
@@ -489,6 +487,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
         return ;
     }
 
+// Part 2:
     // Semantic Check
     // Normal Case
     bool m_error = false;
@@ -497,13 +496,15 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
         this->error_msg+=error_found_msg(m->line_number, m->col_number);
         this->error_msg+="use of undeclared identifier '"+m->variable_name+"'\n";
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-        m_error = true;
-    } else if(check_array_declaration_error(m->variable_name) == true){
-        m_error = true;
-    }
 
-    if(m->expression_node_list != nullptr && m_error == false){
-    // Part1: 
+        m_error = true; // This Error is Special. When it Occur, No need Traverse this Node
+
+    } else if(check_array_declaration_error(m->variable_name) == true){
+
+        m_error = true; // This Error is Special. When it Occur, No need Traverse this Node
+
+    } else if(m->expression_node_list != nullptr && m_error == false){
+
         // First visit expression list
         this->push_src_node(VARIABLE_REFERENCE_NODE);
             if (m->expression_node_list != nullptr)
@@ -511,6 +512,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
                     (*(m->expression_node_list))[i]->accept(*this);
         this->pop_src_node();
 
+    // Part1: 
         // Check the expression stack
         bool index_error = false;
         int type_check = 0;
@@ -557,25 +559,21 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
         
     } else {
         if(m->expression_node_list != nullptr){
-            VariableInfo EntryInfo = *this->get_symbol_entry(m->variable_name).variable_node->type;
-            VariableInfo tmpInfo;
-            tmpInfo.type_set = EntryInfo.type_set;
-            tmpInfo.type = EntryInfo.type;
-
-            unsigned int dimension = EntryInfo.array_range.size() - m->expression_node_list->size();
-            if(dimension == 0){
-                tmpInfo.type_set = SET_SCALAR;
-            } else {
-                for(uint i=m->expression_node_list->size(); i<EntryInfo.array_range.size(); i++)
-                    tmpInfo.array_range.push_back(EntryInfo.array_range[i]);
-            }
-        
-            this->expression_stack.push(tmpInfo);
+            VariableInfo entry_info = *this->get_symbol_entry(m->variable_name).variable_node->type;
+            VariableInfo tmp_info(entry_info.type_set, entry_info.type);
+            int dimension = entry_info.array_range.size() - m->expression_node_list->size();
+            
+            if(dimension == 0) // Exactly SCALAR
+                tmp_info.type_set = SET_SCALAR;
+            else 
+                for(uint i=m->expression_node_list->size(); i<entry_info.array_range.size(); i++)
+                    tmp_info.array_range.push_back(entry_info.array_range[i]);
+            
+            this->expression_stack.push(tmp_info);
             
         } else {
-            VariableInfo tmpInfo = *this->get_symbol_entry(m->variable_name).variable_node->type;
-            this->expression_stack.push(tmpInfo);     
-            
+            VariableInfo tmp_info = *this->get_symbol_entry(m->variable_name).variable_node->type;
+            this->expression_stack.push(tmp_info);     
         }
     }
 }
@@ -597,12 +595,11 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
     this->expression_stack.pop();
     bool error = false;
 
-    VariableInfo tmpInfo;
     if(fault_type_check(lhs)&&fault_type_check(rhs)){
         switch(m->op){
             case OP_OR: 
             case OP_AND:
-            //case OP_NOT:
+            case OP_NOT:
                 if((lhs.type_set == SET_SCALAR || lhs.type_set == SET_CONSTANT_LITERAL) &&
                     (lhs.type == TYPE_BOOLEAN) ) {;}
                 else { error = true; }
@@ -617,11 +614,12 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                     this->error_msg+="('"+info_convert(lhs)+"' and '"+info_convert(rhs)+"')\n";
                     this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
                     break;
+                } else {
+                    this->expression_stack.push(VariableInfo(SET_SCALAR, TYPE_BOOLEAN));
                 }
-                tmpInfo.type_set = SET_SCALAR;
-                tmpInfo.type = TYPE_BOOLEAN;
-                this->expression_stack.push(tmpInfo);
+
                 break;
+
             case OP_LESS: 
             case OP_LESS_OR_EQUAL: 
             case OP_EQUAL: 
@@ -643,20 +641,18 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                     this->error_msg+="('"+info_convert(lhs)+"' and '"+info_convert(rhs)+"')\n";
                     this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
                     break;
+                } else {
+                    this->expression_stack.push(VariableInfo(SET_SCALAR, TYPE_BOOLEAN));
                 }
 
-                tmpInfo.type_set = SET_SCALAR;
-                tmpInfo.type = TYPE_BOOLEAN;
-                this->expression_stack.push(tmpInfo);
                 break;
+
             case OP_PLUS: // Special Case
                 if( (lhs.type_set == SET_SCALAR || lhs.type_set == SET_CONSTANT_LITERAL) &&
                     (lhs.type == TYPE_STRING) &&
                     (rhs.type_set == SET_SCALAR || rhs.type_set == SET_CONSTANT_LITERAL) &&
                     (rhs.type == TYPE_STRING) ){
-                    tmpInfo.type_set = SET_SCALAR;
-                    tmpInfo.type = TYPE_STRING;
-                    this->expression_stack.push(tmpInfo);
+                    this->expression_stack.push(VariableInfo(SET_SCALAR, TYPE_STRING));
                     break;
                 }
                 // Forward Check
@@ -667,18 +663,14 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                     (lhs.type == TYPE_INTEGER) &&
                     (rhs.type_set == SET_SCALAR || rhs.type_set == SET_CONSTANT_LITERAL) &&
                     (rhs.type == TYPE_INTEGER) ){
-                    tmpInfo.type_set = SET_SCALAR;
-                    tmpInfo.type = TYPE_INTEGER;
-                    this->expression_stack.push(tmpInfo);
+                    this->expression_stack.push(VariableInfo(SET_SCALAR, TYPE_INTEGER));
                     break;
-                }
+                } 
                 if( (lhs.type_set == SET_SCALAR || lhs.type_set == SET_CONSTANT_LITERAL) &&
                     (lhs.type == TYPE_INTEGER || lhs.type == TYPE_REAL) &&
                     (rhs.type_set == SET_SCALAR || rhs.type_set == SET_CONSTANT_LITERAL) &&
                     (rhs.type == TYPE_INTEGER || rhs.type == TYPE_REAL) ){
-                    tmpInfo.type_set = SET_SCALAR;
-                    tmpInfo.type = TYPE_REAL;
-                    this->expression_stack.push(tmpInfo);
+                    this->expression_stack.push(VariableInfo(SET_SCALAR, TYPE_REAL));
                     break;
                 } else {
                     error = true;
@@ -690,7 +682,9 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                     this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
                     break;
                 }
+
                 break;
+
             case OP_MOD: 
                 if((lhs.type_set == SET_SCALAR || lhs.type_set == SET_CONSTANT_LITERAL) &&
                     (lhs.type == TYPE_INTEGER) ) {;}
@@ -707,12 +701,12 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
                     this->error_msg+="('"+info_convert(lhs)+"' and '"+info_convert(rhs)+"')\n";
                     this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
                     break;
+                } else {
+                    this->expression_stack.push(VariableInfo(SET_SCALAR, TYPE_INTEGER));
                 }
 
-                tmpInfo.type_set = SET_SCALAR;
-                tmpInfo.type = TYPE_INTEGER;
-                this->expression_stack.push(tmpInfo);
                 break;
+
             default: break;
         }
     } else {
@@ -721,10 +715,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) { //EXPRESSION
 
     if(error == true){
         // Error Has Happened Before or Now
-        VariableInfo tmpInfo;
-        tmpInfo.type_set = UNKNOWN_SET;
-        tmpInfo.type = UNKNOWN_TYPE;
-        this->expression_stack.push(tmpInfo);
+        this->expression_stack.push(VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
     } else {
         ;
     }
@@ -738,37 +729,34 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) { //EXPRESSION
     this->pop_src_node();
 
     //Semantic Check // Expression Stack
-    VariableInfo lhs = this->expression_stack.top();
+    VariableInfo rhs = this->expression_stack.top();
     this->expression_stack.pop();
     bool error = false;
 
-    VariableInfo tmpInfo;
-    if(fault_type_check(lhs)){
+    if(fault_type_check(rhs)){
         switch(m->op){
             case OP_NOT:
-                if((lhs.type_set == SET_SCALAR || lhs.type_set == SET_CONSTANT_LITERAL) &&
-                    (lhs.type == TYPE_BOOLEAN) ) {;}
+                if((rhs.type_set == SET_SCALAR || rhs.type_set == SET_CONSTANT_LITERAL) &&
+                    (rhs.type == TYPE_BOOLEAN) ) {;}
                 else { error = true; }
                 if(error == true){
                     this->semantic_error = 1;
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
                     this->error_msg+="invalid operand to unary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
-                    this->error_msg+="('"+info_convert(lhs)+"')\n";
+                    this->error_msg+="('"+info_convert(rhs)+"')\n";
                     this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
                     break;
+                } else {
+                    this->expression_stack.push(VariableInfo(SET_SCALAR, TYPE_BOOLEAN));
                 }
-                tmpInfo.type_set = SET_SCALAR;
-                tmpInfo.type = TYPE_BOOLEAN;
-                this->expression_stack.push(tmpInfo);
+                
                 break;
             
             case OP_MINUS: 
-                if((lhs.type_set == SET_SCALAR || lhs.type_set == SET_CONSTANT_LITERAL) &&
-                    (lhs.type == TYPE_INTEGER || lhs.type == TYPE_REAL) ) {
-                    tmpInfo.type_set = SET_SCALAR;
-                    tmpInfo.type = lhs.type;
-                    this->expression_stack.push(tmpInfo);
+                if ((rhs.type_set == SET_SCALAR || rhs.type_set == SET_CONSTANT_LITERAL) &&
+                    (rhs.type == TYPE_INTEGER || rhs.type == TYPE_REAL) ) {
+                    this->expression_stack.push(VariableInfo(SET_SCALAR, rhs.type));
                     break;
                 }
                 else {
@@ -777,11 +765,13 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) { //EXPRESSION
                     this->error_msg+=error_found_msg(m->line_number, m->col_number);
                     this->error_msg+="invalid operands to unary operation";
                     this->error_msg+=" '"+op_convert(m->op)+"' ";
-                    this->error_msg+="('"+info_convert(lhs)+"')\n";
+                    this->error_msg+="('"+info_convert(rhs)+"')\n";
                     this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
                     break;
                 }
+
                 break;
+
             default: break;
         }
     } else {
@@ -790,10 +780,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) { //EXPRESSION
 
     if(error == true){
         // Error Has Happened Before or Now
-        VariableInfo tmpInfo;
-        tmpInfo.type_set = UNKNOWN_SET;
-        tmpInfo.type = UNKNOWN_TYPE;
-        this->expression_stack.push(tmpInfo);
+        this->expression_stack.push(VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
     } else {
         ;
     }
@@ -818,8 +805,11 @@ void SemanticAnalyzer::visit(IfNode *m) { //STATEMENT
     VariableInfo tmpInfo = this->expression_stack.top();
     this->expression_stack.pop();
 
+    if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) {
+        return; // No Need Further Check
+    }
+
     if(tmpInfo.type != TYPE_BOOLEAN){
-        if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->condition->line_number, m->condition->col_number);
         this->error_msg+="the expression of condition must be boolean type\n";
@@ -841,9 +831,12 @@ void SemanticAnalyzer::visit(WhileNode *m) { //STATEMENT
     // Semantic Check
     VariableInfo tmpInfo = this->expression_stack.top();
     this->expression_stack.pop();
+    
+    if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) {
+        return; // No Need Further Check
+    }
 
     if(tmpInfo.type != TYPE_BOOLEAN){
-        if(tmpInfo.type_set == UNKNOWN_SET && tmpInfo.type == UNKNOWN_TYPE) return;
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->condition->line_number, m->condition->col_number);
         this->error_msg+="the expression of condition must be boolean type\n";
@@ -902,8 +895,7 @@ void SemanticAnalyzer::visit(ReturnNode *m) { //STATEMENT
     this->expression_stack.pop();
 
     if(r_type.type_set == UNKNOWN_SET && r_type.type == UNKNOWN_TYPE){
-        // No Need Further Check
-        return;
+        return; // No Need Further Check
     }
 
     if(check_program_or_procedure_call() == true){
@@ -935,75 +927,67 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { //EXPRESSION //STATEMENT
     this->pop_src_node();
 
     // Semantic Check
-    bool error_found = false;
     if(check_function_declaration(m->function_name) == false){
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->line_number, m->col_number);
         this->error_msg+="used of undeclared function '"+name_cut(m->function_name)+"'\n";
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-        error_found = true;
         return;
     }
 
     SymbolEntry tmpEntry = this->symbol_table_root->next_scope_list[0]->entry[m->function_name];
     unsigned int arguments_size;
+    
     if(m->arguments != nullptr) arguments_size = m->arguments->size();
     else                        arguments_size = 0;
-    if(error_found==false){
-        if(arguments_size != tmpEntry.function_node->prototype.size()){       
-            this->semantic_error = 1;
-            this->error_msg+=error_found_msg(m->line_number, m->col_number);
-            this->error_msg+="too few/much arguments to function invocation\n";
-            this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-            error_found = true;
-            return;
-        }
-    }    
+    
+    if(arguments_size != tmpEntry.function_node->prototype.size()){       
+        this->semantic_error = 1;
+        this->error_msg+=error_found_msg(m->line_number, m->col_number);
+        this->error_msg+="too few/much arguments to function invocation\n";
+        this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+        return;
+    }
 
-    if(error_found==false){ // We can ensure two para-list-size is same here
-        for(uint i=0; i<tmpEntry.function_node->prototype.size(); i++){
-            VariableInfo tmpInfo = this->expression_stack.top();
-            this->expression_stack.pop();
+    bool error_found = false;
+    for(uint i=0; i<tmpEntry.function_node->prototype.size(); i++){
+        VariableInfo tmpInfo = this->expression_stack.top();
+        this->expression_stack.pop();
 
-            if(error_found == false){
-                switch(tmpInfo.type_set){
-                    case SET_ACCUMLATED:
-                        if(array_size_check(tmpInfo, *(tmpEntry.function_node->prototype[i])) == false){
-                            this->semantic_error = 1;
-                            this->error_msg+=error_found_msg(m->arguments->at(i)->line_number,m->arguments->at(i)->col_number);
-                            this->error_msg+="incompatible types passing '"+info_convert(tmpInfo);
-                            this->error_msg+="' to parameter of type '"+info_convert(*(tmpEntry.function_node->prototype[i]))+"'\n";
-                            error_found = true;
-                        }
-                        break;
-                    case SET_SCALAR:
-                    case SET_CONSTANT_LITERAL:
-                        if(tmpInfo.type != tmpEntry.function_node->prototype[i]->type){
-                            this->semantic_error = 1;
-                            this->error_msg+=error_found_msg(m->arguments->at(i)->line_number,m->arguments->at(i)->col_number);
-                            this->error_msg+="incompatible types passing '"+info_convert(tmpInfo);
-                            this->error_msg+="' to parameter of type '"+info_convert(*(tmpEntry.function_node->prototype[i]))+"'\n";
-                            error_found = true;
-                        }
-                        break;
-                    case UNKNOWN_SET:
-                    default:
+        if(error_found == false){
+            switch(tmpInfo.type_set){
+                case SET_ACCUMLATED:
+                    if(array_size_check(tmpInfo, *(tmpEntry.function_node->prototype[i])) == false){
+                        this->semantic_error = 1;
+                        this->error_msg+=error_found_msg(m->arguments->at(i)->line_number,m->arguments->at(i)->col_number);
+                        this->error_msg+="incompatible types passing '"+info_convert(tmpInfo);
+                        this->error_msg+="' to parameter of type '"+info_convert(*(tmpEntry.function_node->prototype[i]))+"'\n";
                         error_found = true;
-                        break;
-                }
-            }       
-        }
+                    }
+                    break;
+                case SET_SCALAR:
+                case SET_CONSTANT_LITERAL:
+                    if(tmpInfo.type != tmpEntry.function_node->prototype[i]->type){
+                        this->semantic_error = 1;
+                        this->error_msg+=error_found_msg(m->arguments->at(i)->line_number,m->arguments->at(i)->col_number);
+                        this->error_msg+="incompatible types passing '"+info_convert(tmpInfo);
+                        this->error_msg+="' to parameter of type '"+info_convert(*(tmpEntry.function_node->prototype[i]))+"'\n";
+                        error_found = true;
+                    }
+                    break;
+                case UNKNOWN_SET:
+                default:
+                    error_found = true;
+                    break;
+            }
+        }       
     }
 
     // Push Expression Stack
     if(error_found == false){
-        VariableInfo tmpInfo;
-        tmpInfo = *(tmpEntry.function_node->return_type);
+        VariableInfo tmpInfo = *(tmpEntry.function_node->return_type);
         this->expression_stack.push(tmpInfo);
     } else {
-        VariableInfo tmpInfo;
-        tmpInfo.type_set = UNKNOWN_SET;
-        tmpInfo.type     = UNKNOWN_TYPE;
-        this->expression_stack.push(tmpInfo);
+        this->expression_stack.push(VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
     }
 }

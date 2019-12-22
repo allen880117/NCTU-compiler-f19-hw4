@@ -21,7 +21,7 @@ ForNode::ForNode(
         this->initial_statement = _initial_statement;
         this->condition = _condition;
         this->body = _body;
-        this->loop_var_name = _loop_var_name; // HW4 ADD
+
         this->lower_bound = _lower_bound; // HW4 ADD
         this->upper_bound = _upper_bound; // HW4 ADD
     }

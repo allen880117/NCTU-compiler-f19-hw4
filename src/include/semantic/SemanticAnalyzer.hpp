@@ -85,4 +85,5 @@ class SemanticAnalyzer : public ASTVisitorBase
         bool  check_function_declaration(string _name);
 
         VariableInfo get_function_return_type();
+        
 };

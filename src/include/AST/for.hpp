@@ -11,7 +11,6 @@ class ForNode : public ASTNodeBase
         Node condition; // an expression node
         NodeList* body; // a list of statement nodes (zero or more)
 
-        std::string loop_var_name; // HW4 ADD
         int  lower_bound; // HW4 ADD
         int  upper_bound; // HW4 ADD
     public:

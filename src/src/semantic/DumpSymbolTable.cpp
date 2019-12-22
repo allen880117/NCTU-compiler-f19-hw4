@@ -10,7 +10,7 @@ using namespace std;
 
 string name_cut(string _name){
     if(_name.length()>32) return _name.substr(0, 32);
-    else return _name;
+    else                  return _name;
 }
 
 // true -> two type are same

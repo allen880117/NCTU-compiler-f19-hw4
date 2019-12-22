@@ -21,6 +21,8 @@ class Attribute{
     public:
         Attribute();
         Attribute(AttributeType);
+        Attribute(vector<VariableInfo>);
+        Attribute(VariableInfo);
 
         void set_parameter_type(vector<VariableInfo>);
         void set_value_of_constant(VariableInfo);
@@ -62,7 +64,10 @@ class SymbolEntry{
             unsigned int _level,
             VariableInfo _type,
             Attribute _attribute,
-            enum EnumNodeTable _node_type);
+            enum EnumNodeTable _node_type,
+            class ProgramNode* _program_node,
+            class VariableNode* _variable_node,
+            class FunctionNode* _function_node);
 };
 
 class SymbolTable{

@@ -242,12 +242,12 @@ FunctionNode::FunctionNode(
 #### Array Declaration
 
 * `Array Declration` 中，`Lower Bound <= Upper Bound` 。
-* **如果 `Array` 宣告有錯，當不須訪問參考此 `Array` 的 `VariableReferenceNode`。**
+* **如果 `Array` 宣告有錯，當不須訪問此 `Array` 的 `VariableReferenceNode`。**
 
 #### Array Index
 
 * `Index of Array Declaraton` 型別必須是 `Integer` 。
-* **如果前述者有錯，當不須訪問參考此 `Array` 的 `VariableReferenceNode`。**
+* **如果前述者有錯，當不須檢查參考此者的節點**
 * 請從左至右檢查型別。
 * 不須檢查上、下界合理性。
 * `Array Reference` 不能超過其最大維度。
