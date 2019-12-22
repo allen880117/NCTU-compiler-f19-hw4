@@ -66,9 +66,8 @@ void SemanticAnalyzer::dump_symbol_table(){
     this->dump_symbol_table_util(this->symbol_table_root->next_scope_list[0]);
 }
 
-void SemanticAnalyzer::push(SymbolTable* _new_scope, Node m, enum NODE_TABLE type,VariableInfo re_type){
+void SemanticAnalyzer::push(SymbolTable* _new_scope, enum EnumNodeTable type,VariableInfo re_type){
     _new_scope->prev_scope = this->current_scope;
-    _new_scope->in_node = m;
     _new_scope->in_node_type = type;
     _new_scope->in_node_return_type = re_type;
     this->current_scope->next_scope_list.push_back(_new_scope);
@@ -88,7 +87,7 @@ void SemanticAnalyzer::specify_off(){
     this->specify = false;
 }
 
-void SemanticAnalyzer::push_src_node(NODE_TABLE _node){
+void SemanticAnalyzer::push_src_node(EnumNodeTable _node){
     this->src_node.push(_node);
 }
 
@@ -166,7 +165,7 @@ bool SemanticAnalyzer::check_array_declaration_error(string _name){
     while(true){
         if( current->entry[_name].is_used == true )
         {
-            is_error = current->entry[_name].is_error;
+            is_error = current->entry[_name].is_arr_decl_error;
             break;
         } else {
             if(current->level == 0) break;

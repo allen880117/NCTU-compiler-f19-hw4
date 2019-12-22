@@ -55,7 +55,7 @@ class SemanticAnalyzer : public ASTVisitorBase
         void  level_down();
 
         // Scope Manage
-        void  push(SymbolTable* _new_scope, Node m, enum NODE_TABLE type, VariableInfo re_type);
+        void  push(SymbolTable* _new_scope, enum EnumNodeTable type, VariableInfo re_type);
         void  pop();
 
         // Kind Specify
@@ -65,8 +65,8 @@ class SemanticAnalyzer : public ASTVisitorBase
         void  specify_off();
 
         // Source Node
-        stack<enum  NODE_TABLE>  src_node;
-        void  push_src_node(enum NODE_TABLE);
+        stack<enum  EnumNodeTable>  src_node;
+        void  push_src_node(enum EnumNodeTable);
         void  pop_src_node();
 
         // Expression Stack

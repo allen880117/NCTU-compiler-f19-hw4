@@ -31,17 +31,12 @@ bool array_size_check(VariableInfo lhs, VariableInfo rhs){
     return false;
 }
 
-// false for error has happened
+// false -> error has happened
 bool fault_type_check(VariableInfo input){
     if(input.type_set == UNKNOWN_SET || input.type == UNKNOWN_TYPE)
         return false;
     else
         return true;
-}
-
-bool type_check(VariableInfo input, enum enumTypeSet type_set, enum enumType type){
-    if(input.type_set == type_set && input.type == type) return true;
-    else return false;
 }
 
 string op_convert(enum enumOperator op){
@@ -107,27 +102,13 @@ string info_convert(VariableInfo input){
     return msg;
 }
 
-string type_convert(enum enumType type){
-    string msg = "";
-    switch(type){
-        case TYPE_INTEGER: msg = "integer"; break;
-        case TYPE_REAL:    msg = "real";    break;
-        case TYPE_STRING:  msg = "string";  break;
-        case TYPE_BOOLEAN: msg = "boolean"; break;
-        case TYPE_VOID:    msg = "void";    break;
-        default:           msg = "unknown"; break;
-    }
-    return msg;
-}
-
 void dumpDemarcation(const char chr) {
   for (size_t i = 0; i < 110; ++i) {
     cout << chr;
-    //printf("%c", chr);
   }
   cout << endl;
-  //puts("");
 }
+
 void dumpSymbol_Header(){
     dumpDemarcation('=');
     printf("%-33s%-11s%-11s%-17s%-11s\n", "Name", "Kind", "Level", "Type", "Attribute");
@@ -135,10 +116,8 @@ void dumpSymbol_Header(){
 }
 
 void dumpSymbol_Body(SymbolEntry symbol_entry) {
-    //printf("%-33s", "func");
     cout << std::right << std::left << setw(33) << symbol_entry.name;
     
-    //printf("%-11s", "function");
     switch(symbol_entry.kind){
         case KIND_PROGRAM:   cout << std::right << std::left << setw(11) << "program";   break;
         case KIND_FUNCTION:  cout << std::right << std::left << setw(11) << "function";  break;
@@ -149,16 +128,13 @@ void dumpSymbol_Body(SymbolEntry symbol_entry) {
         default: cout << std::right << std::left << setw(33) << "unknown"; break;
     }
 
-    //printf("%d%-10s", 0, "(global)");
     switch(symbol_entry.level){
         case 0:  cout << std::right << 0 << std::left << setw(10) << "(global)";                 break;
         default: cout << std::right << symbol_entry.level << std::left << setw(10) << "(local)"; break;
     }
 
-    //printf("%-17s", "boolean");
     cout << std::right << std::left << setw(17) << info_convert(symbol_entry.type);
 
-    //printf("%-11s", "integer, real [2][3]");
     string msg = "";
     switch(symbol_entry.attribute.attr_type){
         case ATTRIBUTE_PARAMETERS: 
@@ -188,7 +164,6 @@ void dumpSymbol_Body(SymbolEntry symbol_entry) {
         default: break;
     }
 
-    //puts("");
     cout << std::right << endl;
 }
 

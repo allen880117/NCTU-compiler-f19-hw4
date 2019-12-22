@@ -32,10 +32,7 @@ using namespace std;
 void SemanticAnalyzer::visit(ProgramNode *m) {
     // Put Symbol Table (Special Case)
     SymbolTable* new_scope = new SymbolTable(0);
-    VariableInfo tmpInfo;
-    tmpInfo.type_set = UNKNOWN_SET;
-    tmpInfo.type     = TYPE_VOID;
-    this->push(new_scope, m, PROGRAM_NODE, tmpInfo);
+    this->push(new_scope, PROGRAM_NODE, VariableInfo(UNKNOWN_SET, TYPE_VOID));
 
     // Push Symbol Entity
     if(this->current_scope->redeclare_check(m->program_name) == false ){
@@ -214,7 +211,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
             this->error_msg+=" declared as an array with a lower bound greater or equal to upper bound\n";
             this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
 
-            this->current_scope->entry[m->variable_name].is_error = true;
+            this->current_scope->entry[m->variable_name].is_arr_decl_error = true;
             
         }
     } 
@@ -222,7 +219,6 @@ void SemanticAnalyzer::visit(VariableNode *m) {
 
 void SemanticAnalyzer::visit(ConstantValueNode *m) { //EXPRESSION
     this->expression_stack.push(*(m->constant_value));
-    
 }
 
 void SemanticAnalyzer::visit(FunctionNode *m) { 
@@ -255,7 +251,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
     // Push Scope
     this->level_up();
     SymbolTable* new_scope = new SymbolTable(this->level);
-    this->push(new_scope, m, FUNCTION_NODE, *(m->return_type));
+    this->push(new_scope, FUNCTION_NODE, *(m->return_type));
 
     // Visit Child Node
     this->push_src_node(FUNCTION_NODE);
@@ -290,10 +286,7 @@ void SemanticAnalyzer::visit(CompoundStatementNode *m) { //STATEMENT
     {
         this->level_up();
         SymbolTable* new_scope = new SymbolTable(this->level);
-        VariableInfo tmpInfo;
-        tmpInfo.type_set = UNKNOWN_SET;
-        tmpInfo.type     = UNKNOWN_TYPE;
-        this->push(new_scope, m, COMPOUND_STATEMENT_NODE,tmpInfo);
+        this->push(new_scope, COMPOUND_STATEMENT_NODE,VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
     }
 
     // Visit Child Nodes
@@ -498,14 +491,12 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
 
     // Semantic Check
     // Normal Case
-    bool exist = true;
     bool m_error = false;
     if(check_symbol_inside(m->variable_name) == false){
         this->semantic_error = 1;
         this->error_msg+=error_found_msg(m->line_number, m->col_number);
         this->error_msg+="use of undeclared identifier '"+m->variable_name+"'\n";
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
-        exist = false;
         m_error = true;
     } else if(check_array_declaration_error(m->variable_name) == true){
         m_error = true;
@@ -521,6 +512,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
         this->pop_src_node();
 
         // Check the expression stack
+        bool index_error = false;
         int type_check = 0;
         for(uint i=0; i<m->expression_node_list->size(); i++){
             VariableInfo temp = this->expression_stack.top();
@@ -535,11 +527,12 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { //EXPRESSION
                 this->error_msg+="index of array reference must be an integer\n";
                 this->error_msg+=src_notation_msg(this->fp,m->expression_node_list->at(i)->line_number, m->expression_node_list->at(i)->col_number);
                 m_error = true;
+                index_error = true;
             }
         }
 
     // Part2:
-        if(exist){
+        if(index_error == false){
             unsigned int subscript_size = 
                 this->get_symbol_entry(m->variable_name).variable_node->type->array_range.size();
             if(m->expression_node_list->size() > subscript_size){
@@ -862,10 +855,7 @@ void SemanticAnalyzer::visit(ForNode *m) { //STATEMENT
     // Push Scope
     this->level_up();
     SymbolTable* new_scope = new SymbolTable(this->level);
-    VariableInfo tmpInfo;
-    tmpInfo.type_set = UNKNOWN_SET;
-    tmpInfo.type     = UNKNOWN_TYPE;
-    this->push(new_scope, m, FOR_NODE, tmpInfo);
+    this->push(new_scope, FOR_NODE, VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
 
     // Visit Child Node
     this->push_src_node(FOR_NODE);

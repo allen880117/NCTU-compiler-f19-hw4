@@ -48,14 +48,14 @@ enum enumOperator{
     UNKNOWN_OP
 };
 
-enum enumTypeSet{
+enum EnumTypeSet{
     SET_SCALAR = 300,
     SET_ACCUMLATED,
     SET_CONSTANT_LITERAL,
     UNKNOWN_SET
 };
 
-enum enumType{
+enum EnumType{
     TYPE_INTEGER = 400,
     TYPE_REAL,
     TYPE_STRING,
@@ -64,10 +64,10 @@ enum enumType{
     UNKNOWN_TYPE
 };
 
-typedef struct __IntPair{
+struct IntPair{
     int start;
     int end;
-} IntPair;
+};
 
 enum BooleanLiteral{
     Boolean_TRUE = 400,
@@ -75,15 +75,49 @@ enum BooleanLiteral{
     UNKNOWN
 };
 
-typedef struct __VariableInfo{
-    enumTypeSet type_set;
-    enumType type;
+struct VariableInfo{
+    EnumTypeSet type_set;
+    EnumType type;
     vector<IntPair> array_range;
     int int_literal;
     double real_literal;
     string string_literal;
     BooleanLiteral boolean_literal;
-} VariableInfo ;
+
+    VariableInfo(){
+        this->type_set = UNKNOWN_SET;
+        this->type     = UNKNOWN_TYPE;
+    }
+
+    VariableInfo(EnumTypeSet _type_set, EnumType _type){
+        this->type_set = _type_set;
+        this->type     = _type;
+    }
+
+    VariableInfo(EnumTypeSet _type_set, EnumType _type, int _int_literal){
+        this->type_set    = _type_set;
+        this->type        = _type;
+        this->int_literal = _int_literal;
+    }
+
+    VariableInfo(EnumTypeSet _type_set, EnumType _type, double _real_literal){
+        this->type_set     = _type_set;
+        this->type         = _type;
+        this->real_literal = _real_literal;
+    }
+
+    VariableInfo(EnumTypeSet _type_set, EnumType _type, string _string_literal){
+        this->type_set       = _type_set;
+        this->type           = _type;
+        this->string_literal = _string_literal;
+    }
+
+    VariableInfo(EnumTypeSet _type_set, EnumType _type, BooleanLiteral _boolean_literal){
+        this->type_set       = _type_set;
+        this->type           = _type;
+        this->boolean_literal = _boolean_literal;
+    }
+};
 
 struct NodeWithTypeList{
     Node node;

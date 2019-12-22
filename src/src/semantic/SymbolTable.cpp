@@ -29,7 +29,7 @@ SymbolEntry::SymbolEntry(
     unsigned int _level,
     VariableInfo _type,
     Attribute _attribute,
-    enum NODE_TABLE _node_type
+    enum EnumNodeTable _node_type
     ){
         if(_name.length() > 32) this->name = _name.substr(0, 32);
         else                    this->name = _name;
@@ -39,7 +39,7 @@ SymbolEntry::SymbolEntry(
         this->attribute = _attribute;
 
         this->is_used = true;
-        this->is_error = false;
+        this->is_arr_decl_error = false;
         this->node_type = _node_type;
     }
 

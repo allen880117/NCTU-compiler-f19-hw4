@@ -21,7 +21,7 @@ class ReturnNode;
 class FunctionCallNode;
 
 // Enum Nodes
-enum NODE_TABLE {
+enum EnumNodeTable {
     PROGRAM_NODE = 117,
     DECLARATION_NODE,
     VARIABLE_NODE,

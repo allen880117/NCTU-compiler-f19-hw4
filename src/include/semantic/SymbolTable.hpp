@@ -47,26 +47,12 @@ class SymbolEntry{
 
         // Hide Info
         bool         is_used;
-        bool         is_error; // For Array Declaration
-        enum NODE_TABLE node_type;
+        bool         is_arr_decl_error; // For Array Declaration
+        enum EnumNodeTable node_type;
         
         class ProgramNode* program_node;
-        //class DeclarationNode* declaration_node;
         class VariableNode* variable_node;
-        //class ConstantValueNode* constant_value_node;
         class FunctionNode* function_node; 
-        //class CompoundStatementNode* compound_statement_node;
-        //class AssignmentNode* assignment_node;
-        //class PrintNode* print_node;
-        //class ReadNode* read_node;
-        //class VariableReferenceNode* variable_reference_node;
-        //class BinaryOperatorNode* binary_operator_node;
-        //class UnaryOperatorNode* unary_operator_node;
-        //class IfNode* if_node;
-        //class WhileNode* while_node;
-        //class ForNode* for_node;
-        //class ReturnNode* return_node;
-        //class FunctionCallNode* function_call_node;
 
     public:
         SymbolEntry();
@@ -76,16 +62,15 @@ class SymbolEntry{
             unsigned int _level,
             VariableInfo _type,
             Attribute _attribute,
-            enum NODE_TABLE _node_type);
+            enum EnumNodeTable _node_type);
 };
 
 class SymbolTable{
     public:
         // Link Info
         SymbolTable*    prev_scope;
-        Node            in_node;
-        enum NODE_TABLE in_node_type;
-        VariableInfo    in_node_return_type;
+        enum EnumNodeTable in_node_type;
+        VariableInfo       in_node_return_type;
         vector<SymbolTable*>    next_scope_list;
                 
         // General Info
