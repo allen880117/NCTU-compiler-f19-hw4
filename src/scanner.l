@@ -23,7 +23,7 @@ char Buffer[MAX_LINE_LENG];
 
 static int32_t OptSrc = 1;
 static int32_t OptTok = 1;
-int32_t OptDum = 1;
+int32_t        OptDum = 1;
 static char StringLiteral[MAX_LINE_LENG];
 static char *BufferPtr = Buffer;
 

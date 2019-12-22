@@ -1178,24 +1178,22 @@ int main(int argc, const char *argv[]) {
         dumpAST(AST);
 
 	// TODO: construct a SemanticAnalyzer to analyze the AST
-    SemanticAnalyzer visitor(string(argv[1]), fp);
-    AST->accept(visitor);
+    SemanticAnalyzer semantic_analyzer(string(argv[1]), fp);
+    AST->accept(semantic_analyzer);
 
-    if(OptDum == 1){
-        visitor.dump_symbol_table();
-    }
+    if(OptDum == 1)
+        semantic_analyzer.dump_symbol_table();
     
-    if(visitor.is_semantic_error() == 0)
-    printf("\n"
-           "|---------------------------------------------|\n"
-           "|  There is no syntactic and semantic error!  |\n"
-           "|---------------------------------------------|\n");
+    if(semantic_analyzer.is_semantic_error() == 0)
+        printf("\n"
+            "|---------------------------------------------|\n"
+            "|  There is no syntactic and semantic error!  |\n"
+            "|---------------------------------------------|\n");
     else
-    visitor.output_err_msg();
+        semantic_analyzer.output_err_msg();
 
     // Memory_Free
     delete AST;
-    //free(yytext);
     fclose(fp);
     yylex_destroy();
     // Memory_Free_END
