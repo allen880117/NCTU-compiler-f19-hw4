@@ -932,6 +932,9 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { //EXPRESSION //STATEMENT
         this->error_msg+=error_found_msg(m->line_number, m->col_number);
         this->error_msg+="used of undeclared function '"+name_cut(m->function_name)+"'\n";
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+
+        this->expression_stack.push(VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
+
         return;
     }
 
@@ -946,6 +949,9 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { //EXPRESSION //STATEMENT
         this->error_msg+=error_found_msg(m->line_number, m->col_number);
         this->error_msg+="too few/much arguments to function invocation\n";
         this->error_msg+=src_notation_msg(this->fp, m->line_number, m->col_number);
+
+        this->expression_stack.push(VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
+
         return;
     }
 
